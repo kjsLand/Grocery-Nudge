@@ -1,21 +1,29 @@
-// app/api/posts/[id]/route.ts
 import { NextResponse } from 'next/server'
 import { readDb, writeDb } from '@/lib/db'
+
+const DB_NAME = "posts"
+
+type Post = {
+  id: string
+  title: string
+  content: string
+  createdAt: string
+}
 
 export async function DELETE(
   request: Request,
   { params }: { params: { id: string } }
 ) {
-  const id = Number(params.id)
-  const db = readDb()
+  const { id } = params
+  const db = readDb<Post>(DB_NAME)
 
-  const postExists = db.posts.some(p => p.id === id)
+  const postExists = db.items.some(p => p.id === id)
   if (!postExists) {
     return NextResponse.json({ error: 'Post not found' }, { status: 404 })
   }
 
-  db.posts = db.posts.filter(p => p.id !== id)
-  writeDb(db)
+  db.items = db.items.filter(p => p.id !== id)
+  writeDb(DB_NAME, db)
 
   return NextResponse.json({ success: true })
 }
