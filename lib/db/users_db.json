@@ -1,0 +1,10 @@
+{
+  "items": [
+    {
+      "id": "9c0238c6-898e-40d6-a9e3-410db5891708",
+      "email": "test@gmail.com",
+      "passwordHash": "1f93d03107150ca5a964d6c3d53f792c:e34598f5d967abaa6168b714fe727c054cde59c777e3a11d5b0f10256f75090f8b29f9bfb3365fb2d5e4f2e61d8b3840aa84836d891535c93d4da73f5153be17",
+      "createdAt": "2026-07-06T15:34:55.300Z"
+    }
+  ]
+}

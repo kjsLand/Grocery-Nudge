@@ -20,7 +20,7 @@ const courierPrime = Courier_Prime({
   variable: '--font-mono',
 })
 
-export default function LoginPage() {
+export default function RegisterPage() {
   const router = useRouter()
   const [error, setError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -35,14 +35,14 @@ export default function LoginPage() {
     const password = formData.get('password')
 
     try {
-      const response = await fetch('/api/auth/login', {
+      const response = await fetch('/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
       })
 
       if (response.ok) {
-        router.push('/profile')
+        router.push('/login')
         return
       }
 
@@ -55,18 +55,13 @@ export default function LoginPage() {
     }
   }
 
-  function handleSignUpClick() {
-    router.push('/register')
-  }
-
   return (
     <main className={`${caveat.variable} ${sourceSerif.variable} ${courierPrime.variable} wrap`}>
       <div className="page">
         <div className="margin-rule" />
         <div className="content">
           <p className="eyebrow">— private notebook —</p>
-          <h1 className="title">Sign in</h1>
-          <p className="sub">Pick up where you left off.</p>
+          <h1 className="title">Create an Account!</h1>
 
           <form onSubmit={handleSubmit} className="form" noValidate>
             <label className="field">
@@ -85,14 +80,6 @@ export default function LoginPage() {
               {isSubmitting ? 'checking…' : 'Enter'}
             </button>
           </form>
-
-          <a href="#" className="forgot">
-            forgot your password?
-          </a>
-
-          <button type="button" onClick={handleSignUpClick} className="signup-link">
-            Don&apos;t have an account? Sign up
-          </button>
         </div>
       </div>
 
@@ -253,21 +240,6 @@ export default function LoginPage() {
         .forgot {
           display: inline-block;
           margin-top: 28px;
-          font-family: var(--font-serif);
-          font-size: 13px;
-          color: var(--graphite);
-          text-decoration: underline;
-          text-decoration-style: wavy;
-          text-underline-offset: 3px;
-        }
-
-        .signup-link {
-          display: block;
-          margin-top: 12px;
-          background: none;
-          border: none;
-          padding: 0;
-          cursor: pointer;
           font-family: var(--font-serif);
           font-size: 13px;
           color: var(--graphite);
