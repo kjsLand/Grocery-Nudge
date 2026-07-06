@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation"; // App Router (Next 13+)
 
 type GroceryItem = {
   id: string;
@@ -17,6 +18,8 @@ const INITIAL_ITEMS: GroceryItem[] = [
 ];
 
 export default function Landing() {
+  const router = useRouter();
+
   const [items, setItems] = useState<GroceryItem[]>(INITIAL_ITEMS);
   const [toast, setToast] = useState<{ text: string; show: boolean }>({ text: "", show: false });
   const [email, setEmail] = useState("");
@@ -273,9 +276,9 @@ export default function Landing() {
             <button className="btn" onClick={() => scrollTo(signupRef)}>
               Get early access
             </button>
-            <button className="btn ghost" onClick={() => scrollTo(eventsRef)}>
-              See how potlucks work
-            </button>
+            <button className="btn ghost" onClick={() => router.push("/login")}>
+              Sign In
+          </button>
           </div>
           <p className="hero-note">↳ no more four bags of the same tortilla chips</p>
         </div>
