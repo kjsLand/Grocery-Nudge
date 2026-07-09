@@ -6,6 +6,12 @@
       "members": [
         "9c0238c6-898e-40d6-a9e3-410db5891708"
       ]
+    },
+    {
+      "id": "aadcda22-98e2-4164-ad40-91c41e9e9ed0",
+      "title": "First Group",
+      "group_leader": "37ef8d70-66fb-425e-b99b-e5b100f2dee4",
+      "members": []
     }
   ]
 }
