@@ -242,48 +242,6 @@ export default function DashboardPage() {
     >
 
       <NudgeNavBar />
-      {/* Site nav */}
-      <header className="border-b-2 border-dashed border-[#8A8578]/40">
-        <nav className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4">
-          <div
-            className="flex items-center gap-2 text-2xl text-[#2B2B2E]"
-            style={{ fontFamily: "var(--font-hand)" }}
-          >
-            <span className="inline-block h-2.5 w-2.5 rounded-full bg-[#B33A3A]" /> Nudge
-          </div>
-          <div
-            className="hidden gap-6 text-sm text-[#8A8578] sm:flex"
-            style={{ fontFamily: "var(--font-type)" }}
-          >
-            <button className="hover:text-[#2B2B2E]">Shared lists</button>
-            <button className="hover:text-[#2B2B2E]">Events</button>
-            <button className="hover:text-[#2B2B2E]">Receipts</button>
-            <button className="hover:text-[#2B2B2E]">Roadmap</button>
-          </div>
-
-          {/* Account controls replace the old marketing CTA */}
-          {profileStatus === "ready" && user ? (
-            <div className="flex items-center gap-3">
-              <span
-                className="hidden text-xs text-[#8A8578] sm:inline"
-                style={{ fontFamily: "var(--font-mono)" }}
-              >
-                {user.email}
-              </span>
-              <button
-                onClick={handleSignOut}
-                disabled={isSigningOut}
-                className="rounded-sm border-2 border-double border-[#B33A3A] px-4 py-1.5 text-xs font-bold uppercase tracking-wide text-[#B33A3A] transition-colors hover:bg-[#B33A3A] hover:text-[#FAF7ED] disabled:opacity-50"
-                style={{ fontFamily: "var(--font-mono)" }}
-              >
-                {isSigningOut ? "closing…" : "Sign out"}
-              </button>
-            </div>
-          ) : (
-            <div className="h-8 w-24 animate-pulse rounded-sm bg-[#FAF7ED]/60" />
-          )}
-        </nav>
-      </header>
 
       <div className="mx-auto max-w-5xl px-6 py-12">
         {/* Profile summary card */}
