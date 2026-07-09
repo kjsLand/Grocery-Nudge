@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Kalam, Special_Elite, Courier_Prime } from "next/font/google";
 import { Plus, Paperclip, Users, ShoppingBasket, LogIn, LogOut, Trash2, X } from "lucide-react";
-import NudgeNavBar from "../components/Nav"
+import { NudgeNavBar } from "../components/Nav"
 
 const handwritten = Kalam({ subsets: ["latin"], weight: ["400", "700"], variable: "--font-hand" });
 const typewriter = Special_Elite({ subsets: ["latin"], weight: "400", variable: "--font-type" });

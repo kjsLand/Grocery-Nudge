@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Users, Mail, ScanLine } from "lucide-react";
 
 /**
@@ -15,14 +17,6 @@ import { Users, Mail, ScanLine } from "lucide-react";
  *  shadow-tan: #D8CFB0  (deckled edge / drop shadow)
  *
  * Fonts: "Caveat" (bold) for the wordmark, "Patrick Hand" for nav labels.
- *
- * Note: this version uses plain CSS (scoped via the <style> block below) rather
- * than Tailwind's arbitrary-value syntax (e.g. bg-[#EFE9D8]) — this preview
- * environment only ships Tailwind's core precompiled classes, so bracketed
- * arbitrary values silently no-op and break layout. Swap in your own Tailwind
- * config / real class names once this is inside your app, if you'd rather.
- *
- * Swap the <a> tags for next/link's <Link> when dropping this into the app.
  */
 
 const PAGES = [
@@ -31,9 +25,13 @@ const PAGES = [
   { id: "resteraunt", label: "Resteraunt Splitter", href: "/splitter", icon: ScanLine },
 ];
 
-export default function NudgeNavBar() {
-  const [active, setActive] = useState(null);
-  const [hovered, setHovered] = useState(null);
+export function NudgeNavBar() {
+  // Active tab is derived from the URL, not local state — this is what makes
+  // clicking actually work (real navigation via <Link>) and keeps the
+  // highlighted tab correct on refresh / direct links, with no state to get
+  // out of sync.
+  const pathname = usePathname();
+  const [hovered, setHovered] = useState<string | null>(null);
 
   return (
     <div>
@@ -98,6 +96,7 @@ export default function NudgeNavBar() {
           background: transparent;
           transition: background-color 0.2s ease;
           white-space: nowrap;
+          cursor: pointer;
         }
 
         .nudge-tab svg.icon {
@@ -159,7 +158,7 @@ export default function NudgeNavBar() {
       `}</style>
 
       <nav className="nudge-nav">
-        <a href="/" className="nudge-wordmark">
+        <Link href="/" className="nudge-wordmark">
           Nudge
           <svg width="70" height="10" viewBox="0 0 70 10">
             <path
@@ -170,21 +169,17 @@ export default function NudgeNavBar() {
               strokeLinecap="round"
             />
           </svg>
-        </a>
+        </Link>
 
         <ul className="nudge-list">
           {PAGES.map((page) => {
             const Icon = page.icon;
-            const isActive = active === page.id;
+            const isActive = pathname === page.href;
             return (
               <li key={page.id}>
-                <a
+                <Link
                   href={page.href}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    // setActive(page.id);
-                  }}
-                //   onMouseEnter={() => setHovered(page.id)}
+                  onMouseEnter={() => setHovered(page.id)}
                   onMouseLeave={() => setHovered(null)}
                   className={`nudge-tab${isActive ? " is-active" : ""}`}
                   style={{
@@ -227,7 +222,7 @@ export default function NudgeNavBar() {
                       />
                     </svg>
                   )}
-                </a>
+                </Link>
               </li>
             );
           })}

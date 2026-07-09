@@ -1,7 +1,11 @@
 'use client'
 
-import { useState, type FormEvent } from 'react'
+import { NudgeNavBar } from "../components/Nav"
 
-export function Splitter(){
-    return <div></div>
+export default function Splitter(){
+    return (
+        <div>
+            <NudgeNavBar />
+        </div>
+    )
 }
