@@ -32,13 +32,14 @@ export default function RegisterPage() {
 
     const formData = new FormData(event.currentTarget)
     const email = formData.get('email')
+    const phone = formData.get('phone')
     const password = formData.get('password')
 
     try {
       const response = await fetch('/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, phone, password }),
       })
 
       if (response.ok) {
@@ -70,8 +71,13 @@ export default function RegisterPage() {
             </label>
 
             <label className="field">
+              <span className="label">Phone Number</span>
+              <input name="phone" type="tel" required autoComplete="tel" placeholder="(555) 555-5555" />
+            </label>
+
+            <label className="field">
               <span className="label">Password</span>
-              <input name="password" type="password" required autoComplete="current-password" />
+              <input name="password" type="password" required autoComplete="new-password" />
             </label>
 
             {error && <p className="error">{error}</p>}

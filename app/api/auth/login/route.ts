@@ -9,8 +9,10 @@ type User = {
   id: string
   email: string
   passwordHash: string
+  phone: string
   createdAt: string
 }
+
 
 export async function POST(request: Request) {
   const { email, password } = await request.json()

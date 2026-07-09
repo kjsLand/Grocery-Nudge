@@ -10,11 +10,12 @@ type User = {
   id: string
   email: string
   passwordHash: string
+  phone: string
   createdAt: string
 }
 
 export async function POST(request: Request) {
-  const { email, password } = await request.json()
+  const { email, password, phone } = await request.json()
 
   if (!email || !password) {
     return NextResponse.json({ error: 'Email and password are required' }, { status: 400 })
@@ -24,7 +25,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Password must be at least 8 characters' }, { status: 400 })
   }
 
-  const db = readDb<User>(DB_NAME)
+  const db = readDb<User>(DB_NAME) ?? { items: [] }
 
   const existing = db.items.find(u => u.email.toLowerCase() === email.toLowerCase())
   if (existing) {
@@ -35,6 +36,7 @@ export async function POST(request: Request) {
     id: randomUUID(),
     email,
     passwordHash: hashPassword(password),
+    phone: phone,
     createdAt: new Date().toISOString(),
   }
 
