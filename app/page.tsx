@@ -1,6 +1,11 @@
 // app/page.tsx
 import Landing from "./components/Landing";
+import NudgeNavBar from "./components/Nav";
 
 export default function Home() {
-  return <Landing />;
+  return (
+    <div>
+      <Landing />
+    </div>
+  );
 }

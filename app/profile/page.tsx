@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Kalam, Special_Elite, Courier_Prime } from "next/font/google";
 import { Plus, Paperclip, Users, ShoppingBasket, LogIn, LogOut, Trash2, X } from "lucide-react";
+import NudgeNavBar from "../components/Nav"
 
 const handwritten = Kalam({ subsets: ["latin"], weight: ["400", "700"], variable: "--font-hand" });
 const typewriter = Special_Elite({ subsets: ["latin"], weight: "400", variable: "--font-type" });
@@ -239,6 +240,8 @@ export default function DashboardPage() {
         backgroundSize: "14px 14px",
       }}
     >
+
+      <NudgeNavBar />
       {/* Site nav */}
       <header className="border-b-2 border-dashed border-[#8A8578]/40">
         <nav className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4">
