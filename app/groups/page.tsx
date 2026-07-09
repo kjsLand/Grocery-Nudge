@@ -242,6 +242,14 @@ export default function DashboardPage() {
     >
 
       <NudgeNavBar />
+      <button
+                onClick={handleSignOut}
+                disabled={isSigningOut}
+                className="rounded-sm border-2 border-double border-[#B33A3A] px-4 py-1.5 text-xs font-bold uppercase tracking-wide text-[#B33A3A] transition-colors hover:bg-[#B33A3A] hover:text-[#FAF7ED] disabled:opacity-50"
+                style={{ fontFamily: "var(--font-mono)" }}
+              >
+                {isSigningOut ? "closing…" : "Sign out"}
+      </button>
 
       <div className="mx-auto max-w-5xl px-6 py-12">
         {/* Profile summary card */}

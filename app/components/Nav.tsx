@@ -28,7 +28,7 @@ import { Users, Mail, ScanLine } from "lucide-react";
 const PAGES = [
   { id: "groups", label: "Groups", href: "/groups", icon: Users },
   { id: "invites", label: "Invites", href: "/invites", icon: Mail },
-  { id: "scanner", label: "Receipt Scanner", href: "/scanner", icon: ScanLine },
+  { id: "resteraunt", label: "Resteraunt Splitter", href: "/splitter", icon: ScanLine },
 ];
 
 export default function NudgeNavBar() {
