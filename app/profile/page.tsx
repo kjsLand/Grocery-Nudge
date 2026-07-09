@@ -90,7 +90,7 @@ export default function DashboardPage() {
     let cancelled = false;
     async function loadGroups() {
       try {
-        const res = await fetch("/api/groups");
+        const res = await fetch("/api/groups/mine");
         if (!res.ok) throw new Error("Failed to load groups");
         const data: Group[] = await res.json();
         if (!cancelled) setGroups(data);
@@ -315,56 +315,6 @@ export default function DashboardPage() {
               >
                 Try again
               </button>
-            </div>
-          )}
-
-          {profileStatus === "ready" && user && (
-            <div
-              className="relative rounded-sm px-6 py-5 shadow-[3px_4px_0_rgba(43,43,46,0.08)]"
-              style={{ backgroundColor: "#FAF7ED" }}
-            >
-              <Paperclip
-                className="absolute -top-3 left-4 h-7 w-7 -rotate-12 text-[#8A8578]"
-                strokeWidth={1.5}
-              />
-              <p
-                className="text-xs uppercase tracking-wide text-[#8A8578]"
-                style={{ fontFamily: "var(--font-mono)" }}
-              >
-                — private notebook —
-              </p>
-              <div className="mt-2 flex flex-wrap items-end justify-between gap-4">
-                <div className="flex gap-10">
-                  <div>
-                    <dt
-                      className="text-[11px] uppercase tracking-wide text-[#8A8578]"
-                      style={{ fontFamily: "var(--font-mono)" }}
-                    >
-                      Email
-                    </dt>
-                    <dd
-                      className="mt-0.5 text-lg text-[#2B2B2E]"
-                      style={{ fontFamily: "var(--font-type)" }}
-                    >
-                      {user.email}
-                    </dd>
-                  </div>
-                  <div>
-                    <dt
-                      className="text-[11px] uppercase tracking-wide text-[#8A8578]"
-                      style={{ fontFamily: "var(--font-mono)" }}
-                    >
-                      Member since
-                    </dt>
-                    <dd
-                      className="mt-0.5 text-lg text-[#2B2B2E]"
-                      style={{ fontFamily: "var(--font-type)" }}
-                    >
-                      {joined}
-                    </dd>
-                  </div>
-                </div>
-              </div>
             </div>
           )}
         </div>

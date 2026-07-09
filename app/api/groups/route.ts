@@ -9,6 +9,7 @@ const DB_NAME = "group"
 type Group = {
   id: string
   title: string
+  group_leader: string
   members: Array<string>
 }
 
@@ -43,7 +44,8 @@ export async function POST(request: Request) {
   const newGroup: Group = {
     id: randomUUID(),
     title,
-    members: [payload.userId],
+    group_leader: payload.userId,
+    members: []
   }
 
   db.items.push(newGroup)
@@ -51,13 +53,3 @@ export async function POST(request: Request) {
 
   return NextResponse.json(newGroup, { status: 201 })
 }
-
-
-
-// Delete a group
-
-// Get group members
-
-// Join a group
-
-// Remove from group

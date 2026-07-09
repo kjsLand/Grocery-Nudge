@@ -1,3 +1,17 @@
 {
-  "items": []
+  "items": [
+    {
+      "id": "446f3cde-7c17-4c14-a07a-8924e29b68f9",
+      "title": "Test",
+      "members": [
+        "9c0238c6-898e-40d6-a9e3-410db5891708"
+      ]
+    },
+    {
+      "id": "b6adb51b-7286-47ac-8cd8-986ed8dce930",
+      "title": "things",
+      "group_leader": "9c0238c6-898e-40d6-a9e3-410db5891708",
+      "members": []
+    }
+  ]
 }

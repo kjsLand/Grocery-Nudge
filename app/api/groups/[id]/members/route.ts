@@ -8,6 +8,7 @@ const DB_NAME = "group"
 type Group = {
   id: string
   title: string
+  group_leader: string
   members: Array<string>
 }
 

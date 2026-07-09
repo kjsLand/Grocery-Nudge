@@ -8,6 +8,7 @@ const DB_NAME = "group"
 type Group = {
   id: string
   title: string
+  group_leader: string
   members: Array<string>
 }
 
@@ -52,7 +53,7 @@ export async function DELETE(
     return NextResponse.json({ error: 'Group not found' }, { status: 404 })
   }
 
-  if (!group.members.includes(payload.userId)) {
+  if (!group.group_leader.includes(payload.userId)) {
     return NextResponse.json({ error: 'Not a member of this group' }, { status: 403 })
   }
 
