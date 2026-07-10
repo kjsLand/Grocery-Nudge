@@ -3,6 +3,7 @@
 import { useState, type FormEvent } from 'react'
 import { useRouter } from 'next/navigation'
 import { Caveat, Source_Serif_4, Courier_Prime } from 'next/font/google'
+import { NudgeNavBar } from "../components/Nav"
 
 const caveat = Caveat({
   subsets: ['latin'],
@@ -56,9 +57,14 @@ export default function RegisterPage() {
     }
   }
 
+  function handleSignUpClick() {
+    router.push('/login')
+  }
+
   return (
-    <main className={`${caveat.variable} ${sourceSerif.variable} ${courierPrime.variable} wrap`}>
-      <div className="page">
+    <main>
+      <NudgeNavBar landing_only={true} />
+      <div>
         <div className="margin-rule" />
         <div className="content">
           <p className="eyebrow">— private notebook —</p>
@@ -84,6 +90,10 @@ export default function RegisterPage() {
 
             <button type="submit" className="stamp" disabled={isSubmitting}>
               {isSubmitting ? 'checking…' : 'Enter'}
+            </button>
+
+            <button type="button" onClick={handleSignUpClick} className="signup-link">
+              Already have an account?
             </button>
           </form>
         </div>

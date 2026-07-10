@@ -25,7 +25,13 @@ const PAGES = [
   { id: "resteraunt", label: "Resteraunt Splitter", href: "/splitter", icon: ScanLine },
 ];
 
-export function NudgeNavBar() {
+type NudgeNavBarProps = {
+  // landing_only = true  -> signed-out / landing page: wordmark only, no nav links
+  // landing_only = false -> signed-in: show the full nav (Groups, Invites, Splitter)
+  landing_only?: boolean;
+};
+
+export function NudgeNavBar({ landing_only = false }: NudgeNavBarProps) {
   // Active tab is derived from the URL, not local state — this is what makes
   // clicking actually work (real navigation via <Link>) and keeps the
   // highlighted tab correct on refresh / direct links, with no state to get
@@ -171,62 +177,64 @@ export function NudgeNavBar() {
           </svg>
         </Link>
 
-        <ul className="nudge-list">
-          {PAGES.map((page) => {
-            const Icon = page.icon;
-            const isActive = pathname === page.href;
-            return (
-              <li key={page.id}>
-                <Link
-                  href={page.href}
-                  onMouseEnter={() => setHovered(page.id)}
-                  onMouseLeave={() => setHovered(null)}
-                  className={`nudge-tab${isActive ? " is-active" : ""}`}
-                  style={{
-                    backgroundColor:
-                      hovered === page.id && !isActive
-                        ? "rgba(232,200,110,0.35)"
-                        : "transparent",
-                  }}
-                >
-                  <Icon size={16} strokeWidth={2} className="icon" />
-                  <span className="nudge-label-wrap">
-                    {page.label}
-                    {!isActive && (
-                      <svg
-                        viewBox="0 0 100 12"
-                        preserveAspectRatio="none"
-                        className="nudge-squiggle"
-                      >
+        {!landing_only && (
+          <ul className="nudge-list">
+            {PAGES.map((page) => {
+              const Icon = page.icon;
+              const isActive = pathname === page.href;
+              return (
+                <li key={page.id}>
+                  <Link
+                    href={page.href}
+                    onMouseEnter={() => setHovered(page.id)}
+                    onMouseLeave={() => setHovered(null)}
+                    className={`nudge-tab${isActive ? " is-active" : ""}`}
+                    style={{
+                      backgroundColor:
+                        hovered === page.id && !isActive
+                          ? "rgba(232,200,110,0.35)"
+                          : "transparent",
+                    }}
+                  >
+                    <Icon size={16} strokeWidth={2} className="icon" />
+                    <span className="nudge-label-wrap">
+                      {page.label}
+                      {!isActive && (
+                        <svg
+                          viewBox="0 0 100 12"
+                          preserveAspectRatio="none"
+                          className="nudge-squiggle"
+                        >
+                          <path
+                            d="M1,6 C15,1 30,11 45,5 C60,-1 75,10 99,4"
+                            fill="none"
+                            stroke="#8B8378"
+                            strokeWidth="1.5"
+                            strokeLinecap="round"
+                            pathLength="1"
+                          />
+                        </svg>
+                      )}
+                    </span>
+
+                    {isActive && (
+                      <svg viewBox="0 0 130 46" className="nudge-circle">
                         <path
-                          d="M1,6 C15,1 30,11 45,5 C60,-1 75,10 99,4"
+                          d="M20,8 C5,10 3,22 6,32 C9,41 25,44 45,43 C70,42 100,42 115,35 C127,29 126,14 112,8 C95,1 60,3 40,4 C28,4.5 12,6 8,14"
                           fill="none"
-                          stroke="#8B8378"
-                          strokeWidth="1.5"
+                          stroke="#A63D40"
+                          strokeWidth="2.2"
                           strokeLinecap="round"
                           pathLength="1"
                         />
                       </svg>
                     )}
-                  </span>
-
-                  {isActive && (
-                    <svg viewBox="0 0 130 46" className="nudge-circle">
-                      <path
-                        d="M20,8 C5,10 3,22 6,32 C9,41 25,44 45,43 C70,42 100,42 115,35 C127,29 126,14 112,8 C95,1 60,3 40,4 C28,4.5 12,6 8,14"
-                        fill="none"
-                        stroke="#A63D40"
-                        strokeWidth="2.2"
-                        strokeLinecap="round"
-                        pathLength="1"
-                      />
-                    </svg>
-                  )}
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        )}
       </nav>
     </div>
   );
