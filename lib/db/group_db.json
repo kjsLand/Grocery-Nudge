@@ -8,15 +8,33 @@
       ]
     },
     {
-      "id": "aadcda22-98e2-4164-ad40-91c41e9e9ed0",
-      "title": "First Group",
+      "id": "c70bab9a-e182-4b96-b2d6-5a171054f3d9",
+      "title": "My Group",
+      "group_leader": "02e0d618-113b-47a9-b78a-ab10e7a4e314",
+      "members": []
+    },
+    {
+      "id": "c7a007ea-b822-4ed9-bdb9-96454dd6c2ab",
+      "title": "test",
       "group_leader": "37ef8d70-66fb-425e-b99b-e5b100f2dee4",
       "members": []
     },
     {
-      "id": "c70bab9a-e182-4b96-b2d6-5a171054f3d9",
-      "title": "My Group",
-      "group_leader": "02e0d618-113b-47a9-b78a-ab10e7a4e314",
+      "id": "76d42e1d-dbf0-49b2-82dd-3f9d66b01d19",
+      "title": "Another one",
+      "group_leader": "37ef8d70-66fb-425e-b99b-e5b100f2dee4",
+      "members": []
+    },
+    {
+      "id": "f2ad86fd-99dc-4633-b52a-01c4964f9a9b",
+      "title": "more",
+      "group_leader": "37ef8d70-66fb-425e-b99b-e5b100f2dee4",
+      "members": []
+    },
+    {
+      "id": "4d27c3c0-17bd-485d-a483-4c21dca7e2d7",
+      "title": "even more",
+      "group_leader": "37ef8d70-66fb-425e-b99b-e5b100f2dee4",
       "members": []
     }
   ]
