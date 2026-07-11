@@ -29,7 +29,6 @@ export default function GroupPage() {
 
   // Profile state (for sign out + knowing if the current user is a member)
   const [user, setUser] = useState<UserAccount | null>(null);
-  const [isSigningOut, setIsSigningOut] = useState(false);
 
   // Group state
   const [group, setGroup] = useState<Group | null>(null);
@@ -91,15 +90,6 @@ export default function GroupPage() {
       cancelled = true;
     };
   }, [id]);
-
-  async function handleSignOut() {
-    setIsSigningOut(true);
-    try {
-      await fetch("/api/auth/logout", { method: "POST" });
-    } finally {
-      router.push("/login");
-    }
-  }
 
   async function handleJoin() {
     if (!id) return;
@@ -164,17 +154,7 @@ export default function GroupPage() {
         backgroundSize: "14px 14px",
       }}
     >
-      <div>
-        <NudgeNavBar />
-        <button
-          onClick={handleSignOut}
-          disabled={isSigningOut}
-          className="rounded-sm border-2 border-double border-[#B33A3A] px-4 py-1.5 text-xs font-bold uppercase tracking-wide text-[#B33A3A] transition-colors hover:bg-[#B33A3A] hover:text-[#FAF7ED] disabled:opacity-50"
-          style={{ fontFamily: "var(--font-mono)" }}
-        >
-          {isSigningOut ? "closing…" : "Sign out"}
-        </button>
-      </div>
+    <NudgeNavBar />
 
       <div className="mx-auto max-w-3xl px-6 py-12">
         <button
