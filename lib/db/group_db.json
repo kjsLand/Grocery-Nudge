@@ -4,7 +4,8 @@
       "id": "446f3cde-7c17-4c14-a07a-8924e29b68f9",
       "title": "Test",
       "members": [
-        "9c0238c6-898e-40d6-a9e3-410db5891708"
+        "9c0238c6-898e-40d6-a9e3-410db5891708",
+        "02e0d618-113b-47a9-b78a-ab10e7a4e314"
       ]
     },
     {
@@ -14,16 +15,12 @@
       "members": []
     },
     {
-      "id": "c7a007ea-b822-4ed9-bdb9-96454dd6c2ab",
-      "title": "test",
-      "group_leader": "37ef8d70-66fb-425e-b99b-e5b100f2dee4",
-      "members": []
-    },
-    {
       "id": "76d42e1d-dbf0-49b2-82dd-3f9d66b01d19",
       "title": "Another one",
       "group_leader": "37ef8d70-66fb-425e-b99b-e5b100f2dee4",
-      "members": []
+      "members": [
+        "37ef8d70-66fb-425e-b99b-e5b100f2dee4"
+      ]
     },
     {
       "id": "f2ad86fd-99dc-4633-b52a-01c4964f9a9b",

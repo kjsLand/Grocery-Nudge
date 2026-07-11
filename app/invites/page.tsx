@@ -4,6 +4,8 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { Caveat, Source_Serif_4, Courier_Prime } from 'next/font/google'
 import { NudgeNavBar } from "../components/Nav"
+import { useRouter } from "next/navigation";
+
 
 const caveat = Caveat({
   subsets: ['latin'],
@@ -30,7 +32,15 @@ type Invite = {
   createdAt: string
 }
 
+type UserAccount = {
+  id: string;
+  email: string;
+  createdAt: string;
+};
+
 export default function Invites() {
+  const router = useRouter();
+
   const [invites, setInvites] = useState<Invite[]>([])
   const [number, setNumber] = useState('')
   const [groupId, setGroupId] = useState('')
@@ -38,6 +48,9 @@ export default function Invites() {
   const [isSending, setIsSending] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [pendingActionId, setPendingActionId] = useState<string | null>(null)
+
+  const [user, setUser] = useState<UserAccount | null>(null);
+  const [profileStatus, setProfileStatus] = useState<"loading" | "ready" | "error">("loading");
 
   async function loadInvites() {
     try {
@@ -54,6 +67,30 @@ export default function Invites() {
   useEffect(() => {
     loadInvites()
   }, [])
+
+  useEffect(() => {
+    let cancelled = false;
+    async function loadUser() {
+      try {
+        const response = await fetch("/api/auth/me");
+        if (!response.ok) {
+          if (!cancelled) router.push("/login");
+          return;
+        }
+        const data = await response.json();
+        if (!cancelled) {
+          setUser(data);
+          setProfileStatus("ready");
+        }
+      } catch {
+        if (!cancelled) setProfileStatus("error");
+      }
+    }
+    loadUser();
+    return () => {
+      cancelled = true;
+    };
+  }, [router]);
 
   async function handleSend(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -83,13 +120,16 @@ export default function Invites() {
     }
   }
 
-  async function handleAccept(id: string) {
-    setPendingActionId(id)
+  async function handleAccept(invite: Invite) {
+    setPendingActionId(invite.id)
     try {
-      const response = await fetch(`/api/invites/${id}`, { method: 'PATCH' })
+      const response = await fetch(`/api/groups/${invite.group_id}/members`, {
+        method: 'POST',
+      })
       if (response.ok) {
-        const updated = await response.json()
-        setInvites(prev => prev.map(inv => (inv.id === id ? updated : inv)))
+        setInvites(prev =>
+          prev.map(inv => (inv.id === invite.id ? { ...inv, status: 'accepted' } : inv))
+        )
       }
     } finally {
       setPendingActionId(null)
@@ -182,7 +222,7 @@ export default function Invites() {
                             type="button"
                             className="link-btn accept"
                             disabled={pendingActionId === invite.id}
-                            onClick={() => handleAccept(invite.id)}
+                            onClick={() => handleAccept(invite)}
                           >
                             accept
                           </button>
