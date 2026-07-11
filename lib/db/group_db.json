@@ -12,6 +12,12 @@
       "title": "First Group",
       "group_leader": "37ef8d70-66fb-425e-b99b-e5b100f2dee4",
       "members": []
+    },
+    {
+      "id": "c70bab9a-e182-4b96-b2d6-5a171054f3d9",
+      "title": "My Group",
+      "group_leader": "02e0d618-113b-47a9-b78a-ab10e7a4e314",
+      "members": []
     }
   ]
 }

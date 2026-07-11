@@ -5,7 +5,7 @@ import { readDb, writeDb } from '@/lib/db'
 import { verifySessionToken } from '@/lib/session'
 import { randomUUID } from 'crypto'
 
-const DB_NAME = "invites"
+const DB_NAME = "invite"
 const USERS_DB_NAME = "users"
 
 type Invite = {
