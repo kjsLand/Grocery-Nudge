@@ -3,25 +3,10 @@ import { cookies } from 'next/headers'
 import { readDb, writeDb } from '@/lib/db'
 import { verifySessionToken } from '@/lib/session'
 import { randomUUID } from 'crypto'
+import { Group, Invite } from '@/lib/types'
 
 const GROUP_DB = "group"
 const INVITE_DB = "invite"
-
-type Group = {
-  id: string
-  title: string
-  group_leader: string
-  members: Array<string>
-}
-
-type Invite = {
-  id: string
-  group_id: string
-  number: string
-  invitedBy: string
-  status: 'pending' | 'accepted'
-  createdAt: string
-}
 
 async function requireUser() {
   const cookieStore = await cookies()

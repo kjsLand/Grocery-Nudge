@@ -4,26 +4,10 @@ import { cookies } from 'next/headers'
 import { readDb, writeDb } from '@/lib/db'
 import { verifySessionToken } from '@/lib/session'
 import { randomUUID } from 'crypto'
+import { User, Invite } from '@/lib/types'
 
 const DB_NAME = "invite"
 const USERS_DB_NAME = "users"
-
-type Invite = {
-  id: string
-  group_id: string
-  number: string
-  invitedBy: string
-  status: 'pending' | 'accepted'
-  createdAt: string
-}
-
-type User = {
-  id: string
-  email: string
-  passwordHash: string
-  phone: string
-  createdAt: string
-}
 
 // GET /api/invites — list invites for the signed-in user's phone number
 // Optionally pass ?number=xxx to look up invites for a specific number instead

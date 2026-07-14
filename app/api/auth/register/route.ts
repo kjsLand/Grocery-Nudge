@@ -3,16 +3,9 @@ import { readDb, writeDb } from '@/lib/db'
 import { hashPassword } from '@/lib/auth'
 import { createSessionToken } from '@/lib/session'
 import { randomUUID } from 'crypto'
+import { User } from '@/lib/types'
 
 const DB_NAME = "users"
-
-type User = {
-  id: string
-  email: string
-  passwordHash: string
-  phone: string
-  createdAt: string
-}
 
 export async function POST(request: Request) {
   const { email, password, phone } = await request.json()

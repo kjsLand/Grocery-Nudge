@@ -2,15 +2,9 @@ import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { readDb, writeDb } from '@/lib/db'
 import { verifySessionToken } from '@/lib/session'
+import { Group } from '@/lib/types'
 
 const DB_NAME = "group"
-
-type Group = {
-  id: string
-  title: string
-  group_leader: string
-  members: Array<string>
-}
 
 async function requireUser() {
   const cookieStore = await cookies()

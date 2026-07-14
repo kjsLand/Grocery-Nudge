@@ -2,17 +2,9 @@ import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { verifySessionToken } from '@/lib/session'
 import { readDb } from '@/lib/db'
+import { User } from '@/lib/types'
 
 const DB_NAME = "users"
-
-type User = {
-  id: string
-  email: string
-  passwordHash: string
-  phone: string
-  createdAt: string
-}
-
 
 export async function GET() {
   const cookieStore = await cookies()

@@ -2,17 +2,9 @@ import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { readDb, writeDb } from '@/lib/db'
 import { verifySessionToken } from '@/lib/session'
+import { Invite } from '@/lib/types'
 
 const DB_NAME = "invite"
-
-type Invite = {
-  id: string
-  group_id: string
-  number: string
-  invitedBy: string
-  status: 'pending' | 'accepted'
-  createdAt: string
-}
 
 async function requireUser() {
   const cookieStore = await cookies()

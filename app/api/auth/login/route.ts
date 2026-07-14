@@ -2,17 +2,9 @@ import { NextResponse } from 'next/server'
 import { readDb } from '@/lib/db'
 import { verifyPassword } from '@/lib/auth'
 import { createSessionToken } from '@/lib/session'
+import { User } from '@/lib/types'
 
 const DB_NAME = "users"
-
-type User = {
-  id: string
-  email: string
-  passwordHash: string
-  phone: string
-  createdAt: string
-}
-
 
 export async function POST(request: Request) {
   const { email, password } = await request.json()
