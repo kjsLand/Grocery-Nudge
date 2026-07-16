@@ -43,3 +43,5 @@ next-env.d.ts
 /PLAN.md
 
 /nudge-api
+
+/lib/db/*
