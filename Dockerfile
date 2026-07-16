@@ -10,6 +10,7 @@ FROM node:20-alpine AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+RUN npx prisma generate
 RUN npm run build
 
 # --- runner: small final image, just what's needed to run ---

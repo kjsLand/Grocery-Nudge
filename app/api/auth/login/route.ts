@@ -1,10 +1,7 @@
 import { NextResponse } from 'next/server'
-import { readDb } from '@/lib/db'
+import { prisma } from '@/lib/prisma'
 import { verifyPassword } from '@/lib/auth'
 import { createSessionToken } from '@/lib/session'
-import { User } from '@/lib/types'
-
-const DB_NAME = "users"
 
 export async function POST(request: Request) {
   const { email, password } = await request.json()
@@ -13,8 +10,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Email and password are required' }, { status: 400 })
   }
 
-  const db = readDb<User>(DB_NAME)
-  const user = db.items.find(u => u.email.toLowerCase() === email.toLowerCase())
+  const user = await prisma.user.findUnique({
+    where: { email: email.toLowerCase() },
+  })
 
   // Same error whether the user doesn't exist or the password is wrong —
   // don't give attackers a way to enumerate valid emails

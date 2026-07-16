@@ -1,0 +1,34 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: nudge-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: nudge
+      POSTGRES_PASSWORD: devpassword
+      POSTGRES_DB: nudge
+    ports:
+      - "5432:5432"
+    volumes:
+      - nudge_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nudge"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  web:
+    build: .
+    container_name: nudge-dev
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://nudge:devpassword@db:5432/nudge
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./lib/db:/app/lib/db
+
+volumes:
+  nudge_pgdata:

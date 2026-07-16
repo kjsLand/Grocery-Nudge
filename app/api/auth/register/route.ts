@@ -1,11 +1,8 @@
 import { NextResponse } from 'next/server'
-import { readDb, writeDb } from '@/lib/db'
+import { prisma } from '@/lib/prisma'
 import { hashPassword } from '@/lib/auth'
 import { createSessionToken } from '@/lib/session'
 import { randomUUID } from 'crypto'
-import { User } from '@/lib/types'
-
-const DB_NAME = "users"
 
 export async function POST(request: Request) {
   const { email, password, phone } = await request.json()
@@ -18,23 +15,22 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Password must be at least 8 characters' }, { status: 400 })
   }
 
-  const db = readDb<User>(DB_NAME) ?? { items: [] }
-
-  const existing = db.items.find(u => u.email.toLowerCase() === email.toLowerCase())
+  const existing = await prisma.user.findUnique({
+    where: { email: email.toLowerCase() },
+  })
   if (existing) {
     return NextResponse.json({ error: 'An account with this email already exists' }, { status: 409 })
   }
 
-  const newUser: User = {
-    id: randomUUID(),
-    email,
-    passwordHash: hashPassword(password),
-    phone: phone,
-    createdAt: new Date().toISOString(),
-  }
-
-  db.items.push(newUser)
-  writeDb(DB_NAME, db)
+  const newUser = await prisma.user.create({
+    data: {
+      id: randomUUID(),
+      email: email.toLowerCase(),
+      passwordHash: hashPassword(password),
+      phone: phone,
+      createdAt: new Date().toISOString(),
+    },
+  })
 
   // Log the user in immediately after registering
   const token = createSessionToken(newUser.id)
