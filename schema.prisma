@@ -14,3 +14,15 @@ model User {
   phone        String
   createdAt    DateTime @default(now())
 }
+
+model Group {
+  id          String    @id @default(uuid())
+  title       String
+  leaderId    String
+}
+
+model UserGroups {
+  id          String    @id @default(uuid())
+  userId      String
+  groupId     String
+}

@@ -1,22 +1,29 @@
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
-import { readDb, writeDb } from '@/lib/db'
+import { prisma } from '@/lib/prisma'
 import { verifySessionToken } from '@/lib/session'
 import { randomUUID } from 'crypto'
 
-const DB_NAME = "group"
-
-type Group = {
-  id: string
-  title: string
-  group_leader: string
-  members: Array<string>
-}
-
 // GET /api/groups — list all groups
 export async function GET() {
-  const db = readDb<Group>(DB_NAME)
-  return NextResponse.json(db.items)
+  const [groups, userGroups] = await Promise.all([
+    prisma.group.findMany(),
+    prisma.userGroups.findMany(),
+  ])
+
+  const membersByGroup = new Map<string, string[]>()
+  for (const ug of userGroups) {
+    const list = membersByGroup.get(ug.groupId) ?? []
+    list.push(ug.userId)
+    membersByGroup.set(ug.groupId, list)
+  }
+
+  const result = groups.map((group) => ({
+    ...group,
+    members: membersByGroup.get(group.id) ?? [],
+  }))
+
+  return NextResponse.json(result)
 }
 
 // POST /api/groups — create a new group, current user becomes first member
@@ -39,17 +46,27 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Title is required' }, { status: 400 })
   }
 
-  const db = readDb<Group>(DB_NAME)
+  const groupId = randomUUID()
 
-  const newGroup: Group = {
-    id: randomUUID(),
-    title,
-    group_leader: payload.userId,
-    members: []
-  }
+  const [newGroup] = await prisma.$transaction([
+    prisma.group.create({
+      data: {
+        id: groupId,
+        title,
+        leaderId: payload.userId,
+      },
+    }),
+    prisma.userGroups.create({
+      data: {
+        id: randomUUID(),
+        userId: payload.userId,
+        groupId: groupId,
+      },
+    }),
+  ])
 
-  db.items.push(newGroup)
-  writeDb(DB_NAME, db)
-
-  return NextResponse.json(newGroup, { status: 201 })
+  return NextResponse.json(
+    { ...newGroup, members: [payload.userId] },
+    { status: 201 }
+  )
 }
