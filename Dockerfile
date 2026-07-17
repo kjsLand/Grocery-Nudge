@@ -5,6 +5,19 @@ RUN apk add --no-cache python3 make g++
 COPY package.json package-lock.json ./
 RUN npm ci
 
+# --- dev: run `next dev` with hot-reload, source mounted from host ---
+FROM node:20-alpine AS dev
+WORKDIR /app
+RUN apk add --no-cache python3 make g++ curl
+ENV NODE_ENV=development
+ENV NEXT_TELEMETRY_DISABLED=1
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+RUN npx prisma generate
+EXPOSE 3000
+ENV PORT=3000
+CMD ["npm", "run", "dev"]
+
 # --- builder: build the Next.js app ---
 FROM node:20-alpine AS builder
 WORKDIR /app

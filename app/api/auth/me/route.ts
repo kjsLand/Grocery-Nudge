@@ -1,10 +1,7 @@
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { verifySessionToken } from '@/lib/session'
-import { readDb } from '@/lib/db'
-import { User } from '@/lib/types'
-
-const DB_NAME = "users"
+import { prisma } from '@/lib/prisma'
 
 export async function GET() {
   const cookieStore = await cookies()
@@ -19,8 +16,9 @@ export async function GET() {
     return NextResponse.json({ error: 'Session expired' }, { status: 401 })
   }
 
-  const db = readDb<User>(DB_NAME)
-  const user = db.items.find(u => u.id === payload.userId)
+  const user = await prisma.user.findUnique({
+    where: { id: payload.userId },
+  })
 
   if (!user) {
     return NextResponse.json({ error: 'User not found' }, { status: 404 })

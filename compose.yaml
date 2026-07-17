@@ -18,7 +18,9 @@ services:
       retries: 5
 
   web:
-    build: .
+    build:
+      context: .
+      target: dev            # <- dev for development, runner for prod
     container_name: nudge-dev
     depends_on:
       db:
@@ -28,6 +30,9 @@ services:
     ports:
       - "3000:3000"
     volumes:
+      - .:/app               # mount source for hot-reload
+      - /app/node_modules    # anonymous volume shields container's node_modules from being shadowed
+      - /app/.next           # same idea — keep container's .next isolated
       - ./lib/db:/app/lib/db
 
 volumes:
