@@ -1,5 +1,5 @@
 // app/page.tsx
-import Landing from "./components/Landing";
+import Landing from "./src/components/Landing";
 
 export default function Home() {
   return (
