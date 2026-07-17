@@ -1,10 +1,9 @@
+// app/api/groups/[id]/members/route.ts
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
-import { readDb, writeDb } from '@/lib/db'
+import { prisma } from '@/lib/prisma'
 import { verifySessionToken } from '@/lib/session'
-import { Group } from '@/lib/types'
-
-const DB_NAME = "group"
+import { randomUUID } from 'crypto'
 
 async function requireUser() {
   const cookieStore = await cookies()
@@ -19,14 +18,14 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params
-  const db = readDb<Group>(DB_NAME)
-  const group = db.items.find((g) => g.id === id)
+  const group = await prisma.group.findUnique({ where: { id } })
 
   if (!group) {
     return NextResponse.json({ error: 'Group not found' }, { status: 404 })
   }
 
-  return NextResponse.json(group.members)
+  const rows = await prisma.userGroups.findMany({ where: { groupId: id } })
+  return NextResponse.json(rows.map((r) => r.userId))
 }
 
 // POST /api/groups/:id/members — join a group
@@ -40,21 +39,25 @@ export async function POST(
   }
 
   const { id } = await params
-  const db = readDb<Group>(DB_NAME)
-  const group = db.items.find((g) => g.id === id)
+  const group = await prisma.group.findUnique({ where: { id } })
 
   if (!group) {
     return NextResponse.json({ error: 'Group not found' }, { status: 404 })
   }
 
-  if (group.members.includes(payload.userId)) {
+  const existing = await prisma.userGroups.findFirst({
+    where: { groupId: id, userId: payload.userId },
+  })
+  if (existing) {
     return NextResponse.json({ error: 'Already a member' }, { status: 409 })
   }
 
-  group.members.push(payload.userId)
-  writeDb(DB_NAME, db)
+  await prisma.userGroups.create({
+    data: { id: randomUUID(), userId: payload.userId, groupId: id },
+  })
 
-  return NextResponse.json(group)
+  const members = await prisma.userGroups.findMany({ where: { groupId: id } })
+  return NextResponse.json({ ...group, members: members.map((m) => m.userId) })
 }
 
 // DELETE /api/groups/:id/members — leave a group
@@ -68,19 +71,21 @@ export async function DELETE(
   }
 
   const { id } = await params
-  const db = readDb<Group>(DB_NAME)
-  const group = db.items.find((g) => g.id === id)
+  const group = await prisma.group.findUnique({ where: { id } })
 
   if (!group) {
     return NextResponse.json({ error: 'Group not found' }, { status: 404 })
   }
 
-  if (!group.members.includes(payload.userId)) {
+  const existing = await prisma.userGroups.findFirst({
+    where: { groupId: id, userId: payload.userId },
+  })
+  if (!existing) {
     return NextResponse.json({ error: 'Not a member of this group' }, { status: 400 })
   }
 
-  group.members = group.members.filter((m) => m !== payload.userId)
-  writeDb(DB_NAME, db)
+  await prisma.userGroups.delete({ where: { id: existing.id } })
 
-  return NextResponse.json(group)
+  const members = await prisma.userGroups.findMany({ where: { groupId: id } })
+  return NextResponse.json({ ...group, members: members.map((m) => m.userId) })
 }

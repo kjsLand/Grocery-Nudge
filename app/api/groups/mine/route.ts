@@ -1,16 +1,8 @@
+// app/api/groups/mine/route.ts
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
-import { readDb } from '@/lib/db'
+import { prisma } from '@/lib/prisma'
 import { verifySessionToken } from '@/lib/session'
-
-const DB_NAME = "group"
-
-type Group = {
-  id: string
-  title: string
-  group_leader: string
-  members: Array<string>
-}
 
 // GET /api/groups/mine — list groups the current user belongs to
 export async function GET() {
@@ -26,13 +18,31 @@ export async function GET() {
     return NextResponse.json({ error: 'Session expired' }, { status: 401 })
   }
 
-  const db = readDb<Group>(DB_NAME)
+  const memberRows = await prisma.userGroups.findMany({
+    where: { userId: payload.userId },
+  })
+  const groupIds = memberRows.map((r) => r.groupId)
 
-  const myGroups = db.items.filter(
-    (group) =>
-      group.group_leader === payload.userId ||
-      group.members.includes(payload.userId)
-  )
+  if (groupIds.length === 0) {
+    return NextResponse.json([])
+  }
+
+  const [groups, allMemberRows] = await Promise.all([
+    prisma.group.findMany({ where: { id: { in: groupIds } } }),
+    prisma.userGroups.findMany({ where: { groupId: { in: groupIds } } }),
+  ])
+
+  const membersByGroup = new Map<string, string[]>()
+  for (const row of allMemberRows) {
+    const list = membersByGroup.get(row.groupId) ?? []
+    list.push(row.userId)
+    membersByGroup.set(row.groupId, list)
+  }
+
+  const myGroups = groups.map((group) => ({
+    ...group,
+    members: membersByGroup.get(group.id) ?? [],
+  }))
 
   return NextResponse.json(myGroups)
 }
