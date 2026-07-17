@@ -1,10 +1,7 @@
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
-import { readDb, writeDb } from '@/lib/db'
+import { prisma } from '@/lib/prisma'
 import { verifySessionToken } from '@/lib/session'
-import { Group } from '@/lib/types'
-
-const DB_NAME = "group"
 
 async function requireUser() {
   const cookieStore = await cookies()
@@ -19,8 +16,7 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params
-  const db = readDb<Group>(DB_NAME)
-  const group = db.items.find((g) => g.id === id)
+  const group = await prisma.group.findUnique({ where: { id } })
 
   if (!group) {
     return NextResponse.json({ error: 'Group not found' }, { status: 404 })
@@ -40,19 +36,24 @@ export async function DELETE(
   }
 
   const { id } = await params
-  const db = readDb<Group>(DB_NAME)
-  const group = db.items.find((g) => g.id === id)
+  const group = await prisma.group.findUnique({ where: { id } })
 
   if (!group) {
     return NextResponse.json({ error: 'Group not found' }, { status: 404 })
   }
 
-  if (!group.group_leader.includes(payload.userId)) {
+  const membership = await prisma.userGroups.findFirst({
+    where: { groupId: id, userId: payload.userId },
+  })
+
+  if (!membership) {
     return NextResponse.json({ error: 'Not a member of this group' }, { status: 403 })
   }
 
-  db.items = db.items.filter((g) => g.id !== id)
-  writeDb(DB_NAME, db)
+  await prisma.$transaction([
+    prisma.userGroups.deleteMany({ where: { groupId: id } }),
+    prisma.group.delete({ where: { id } }),
+  ])
 
   return NextResponse.json({ success: true })
 }

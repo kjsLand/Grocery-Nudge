@@ -6,24 +6,8 @@ import { randomUUID } from 'crypto'
 
 // GET /api/groups — list all groups
 export async function GET() {
-  const [groups, userGroups] = await Promise.all([
-    prisma.group.findMany(),
-    prisma.userGroups.findMany(),
-  ])
-
-  const membersByGroup = new Map<string, string[]>()
-  for (const ug of userGroups) {
-    const list = membersByGroup.get(ug.groupId) ?? []
-    list.push(ug.userId)
-    membersByGroup.set(ug.groupId, list)
-  }
-
-  const result = groups.map((group) => ({
-    ...group,
-    members: membersByGroup.get(group.id) ?? [],
-  }))
-
-  return NextResponse.json(result)
+  const groups = await prisma.group.findMany()
+  return NextResponse.json(groups)
 }
 
 // POST /api/groups — create a new group, current user becomes first member
@@ -44,6 +28,21 @@ export async function POST(request: Request) {
 
   if (!title) {
     return NextResponse.json({ error: 'Title is required' }, { status: 400 })
+  }
+
+  const existing = await prisma.group.findUnique({
+    where: {
+      leaderId_title: {
+        leaderId: payload.userId,
+        title,
+      },
+    },
+  })
+  if (existing) {
+    return NextResponse.json(
+      { error: 'You already have a group with this title' },
+      { status: 409 }
+    )
   }
 
   const groupId = randomUUID()

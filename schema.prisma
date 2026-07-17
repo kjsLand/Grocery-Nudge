@@ -19,6 +19,8 @@ model Group {
   id          String    @id @default(uuid())
   title       String
   leaderId    String
+
+  @@unique([leaderId, title], name: "leaderId_title")
 }
 
 model UserGroups {
