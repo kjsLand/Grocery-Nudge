@@ -56,7 +56,7 @@ export default function DashboardPage() {
       try {
         const response = await fetch("/api/auth/me");
         if (!response.ok) {
-          if (!cancelled) router.push("/login");
+          if (!cancelled) router.push("/src/login");
           return;
         }
         const data = await response.json();
@@ -117,7 +117,7 @@ export default function DashboardPage() {
   }
 
   function openGroup(id: string) {
-    router.push(`/groups/${id}`);
+    router.push(`/src/groups/${id}`);
   }
 
   async function handleJoin(e: React.MouseEvent, id: string) {

@@ -43,7 +43,7 @@ export default function LoginPage() {
       })
 
       if (response.ok) {
-        router.push('/groups')
+        router.push('/src/groups')
         return
       }
 
@@ -57,7 +57,7 @@ export default function LoginPage() {
   }
 
   function handleSignUpClick() {
-    router.push('/register')
+    router.push('/src/register')
   }
 
   return (

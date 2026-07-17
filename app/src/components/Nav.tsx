@@ -6,9 +6,9 @@ import { usePathname, useRouter } from "next/navigation";
 import { Users, Mail, ScanLine, LogOut } from "lucide-react";
 
 const PAGES = [
-  { id: "groups", label: "Groups", href: "/groups", icon: Users },
-  { id: "invites", label: "Invites", href: "/invites", icon: Mail },
-  { id: "resteraunt", label: "Resteraunt Splitter", href: "/splitter", icon: ScanLine },
+  { id: "groups", label: "Groups", href: "/src/groups", icon: Users },
+  { id: "invites", label: "Invites", href: "/src/invites", icon: Mail },
+  { id: "resteraunt", label: "Resteraunt Splitter", href: "/src/splitter", icon: ScanLine },
 ];
 
 type NudgeNavBarProps = {
@@ -26,7 +26,7 @@ export function NudgeNavBar({ landing_only = false }: NudgeNavBarProps) {
     try {
       await fetch("/api/auth/logout", { method: "POST" });
     } finally {
-      router.push("/login");
+      router.push("/src/login");
     }
   }
 

@@ -276,7 +276,7 @@ export default function Landing() {
             <button className="btn" onClick={() => scrollTo(signupRef)}>
               Get early access
             </button>
-            <button className="btn ghost" onClick={() => router.push("/login")}>
+            <button className="btn ghost" onClick={() => router.push("src/login")}>
               Sign In
           </button>
           </div>

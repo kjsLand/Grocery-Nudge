@@ -52,7 +52,7 @@ export default function GroupPage() {
       try {
         const res = await fetch("/api/auth/me");
         if (!res.ok) {
-          if (!cancelled) router.push("/login");
+          if (!cancelled) router.push("/src/login");
           return;
         }
         const data = await res.json();
@@ -134,7 +134,7 @@ export default function GroupPage() {
       const res = await fetch(`/api/groups/${id}`, { method: "DELETE" });
       const data = await res.json();
       if (!res.ok) throw new Error(data?.error || "Failed to delete group");
-      router.push("/groups");
+      router.push("/src/groups");
     } catch (err) {
       console.error(err);
       setActionError(err instanceof Error ? err.message : "Something went wrong");
@@ -158,7 +158,7 @@ export default function GroupPage() {
 
       <div className="mx-auto max-w-3xl px-6 py-12">
         <button
-          onClick={() => router.push("/groups")}
+          onClick={() => router.push("/src/groups")}
           className="mb-8 flex items-center gap-1.5 text-sm text-[#8A8578] hover:text-[#2B2B2E]"
           style={{ fontFamily: "var(--font-type)" }}
         >

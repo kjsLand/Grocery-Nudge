@@ -44,7 +44,7 @@ export default function RegisterPage() {
       })
 
       if (response.ok) {
-        router.push('/login')
+        router.push('/src/login')
         return
       }
 
@@ -58,7 +58,7 @@ export default function RegisterPage() {
   }
 
   function handleSignUpClick() {
-    router.push('/login')
+    router.push('/src/login')
   }
 
   return (
