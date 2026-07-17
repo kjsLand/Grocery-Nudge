@@ -19,7 +19,7 @@ type UserAccount = {
 interface Group {
   id: string;
   title: string;
-  members: string[];
+  members?: string[];
 }
 
 export default function GroupPage() {
@@ -143,7 +143,8 @@ export default function GroupPage() {
     }
   }
 
-  const isMember = !!user && !!group && group.members.includes(user.id);
+  const members = group?.members ?? [];
+  const isMember = !!user && members.includes(user.id);
 
   return (
     <div
@@ -197,7 +198,7 @@ export default function GroupPage() {
                 style={{ fontFamily: "var(--font-type)" }}
               >
                 <Users className="h-4 w-4" strokeWidth={1.75} />
-                {group.members.length} member{group.members.length === 1 ? "" : "s"}
+                {members.length} member{members.length === 1 ? "" : "s"}
               </div>
             </div>
 
@@ -250,13 +251,13 @@ export default function GroupPage() {
               >
                 Members
               </p>
-              {group.members.length === 0 ? (
+              {members.length === 0 ? (
                 <p className="text-sm text-[#8A8578]" style={{ fontFamily: "var(--font-type)" }}>
                   No members yet.
                 </p>
               ) : (
                 <ul className="space-y-1">
-                  {group.members.map((m) => (
+                  {members.map((m) => (
                     <li key={m} className="text-sm text-[#2B2B2E]" style={{ fontFamily: "var(--font-type)" }}>
                       {m}
                     </li>
