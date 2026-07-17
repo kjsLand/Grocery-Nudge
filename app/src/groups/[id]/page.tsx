@@ -19,8 +19,10 @@ type UserAccount = {
 interface Group {
   id: string;
   title: string;
-  members?: string[];
+  leaderId: string;
 }
+
+type Member = { id: string; phone: string }
 
 export default function GroupPage() {
   const params = useParams<{ id: string }>();
@@ -38,6 +40,10 @@ export default function GroupPage() {
   // Action state
   const [actionBusy, setActionBusy] = useState<"join" | "leave" | "delete" | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
+
+  const [members, setMembers] = useState<Member[]>([]);
+  // Bumped after join/leave to re-trigger the members fetch below
+  const [membersVersion, setMembersVersion] = useState(0);
 
   useEffect(() => {
     document.body.style.backgroundColor = "#EDE6D6";
@@ -91,6 +97,36 @@ export default function GroupPage() {
     };
   }, [id]);
 
+  useEffect(() => {
+    if (!id) return;
+
+    let cancelled = false;
+
+    async function loadMembers() {
+      const memberRes = await fetch(`/api/groups/${id}/members`);
+      if (!memberRes.ok) return;
+      const memberIds: string[] = await memberRes.json();
+
+      if (memberIds.length === 0) {
+        if (!cancelled) setMembers([]);
+        return;
+      }
+
+      const usersRes = await fetch(`/api/users?ids=${memberIds.join(',')}`);
+      if (!usersRes.ok) return;
+      const users: Member[] = await usersRes.json();
+
+      if (!cancelled) setMembers(users);
+    }
+
+    loadMembers();
+
+    return () => {
+      cancelled = true;
+    };
+    // membersVersion is a manual trigger — bumped after join/leave so this refetches
+  }, [id, membersVersion]);
+
   async function handleJoin() {
     if (!id) return;
     setActionBusy("join");
@@ -100,6 +136,7 @@ export default function GroupPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data?.error || "Failed to join group");
       setGroup(data);
+      setMembersVersion((v) => v + 1);
     } catch (err) {
       console.error(err);
       setActionError(err instanceof Error ? err.message : "Something went wrong");
@@ -117,6 +154,7 @@ export default function GroupPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data?.error || "Failed to leave group");
       setGroup(data);
+      setMembersVersion((v) => v + 1);
     } catch (err) {
       console.error(err);
       setActionError(err instanceof Error ? err.message : "Something went wrong");
@@ -143,8 +181,7 @@ export default function GroupPage() {
     }
   }
 
-  const members = group?.members ?? [];
-  const isMember = !!user && members.includes(user.id);
+  const isMember = !!user && members.some((m) => m.id === user.id);
 
   return (
     <div
@@ -258,8 +295,8 @@ export default function GroupPage() {
               ) : (
                 <ul className="space-y-1">
                   {members.map((m) => (
-                    <li key={m} className="text-sm text-[#2B2B2E]" style={{ fontFamily: "var(--font-type)" }}>
-                      {m}
+                    <li key={m.id} className="text-sm text-[#2B2B2E]" style={{ fontFamily: "var(--font-type)" }}>
+                      {m.phone.substring(0, 3) + "-" + m.phone.substring(3, 6) + "-" + m.phone.substring(6, 10)}
                     </li>
                   ))}
                 </ul>
