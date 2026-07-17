@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { Kalam, Special_Elite, Courier_Prime } from "next/font/google";
 import { Users, LogIn, LogOut, Trash2, ArrowLeft } from "lucide-react";
 import { NudgeNavBar } from "../../components/Nav"
+import { GroceryListsSection } from "../../grocery_section/page";
 
 const handwritten = Kalam({ subsets: ["latin"], weight: ["400", "700"], variable: "--font-hand" });
 const typewriter = Special_Elite({ subsets: ["latin"], weight: "400", variable: "--font-type" });
@@ -44,6 +45,8 @@ export default function GroupPage() {
   const [members, setMembers] = useState<Member[]>([]);
   // Bumped after join/leave to re-trigger the members fetch below
   const [membersVersion, setMembersVersion] = useState(0);
+
+
 
   useEffect(() => {
     document.body.style.backgroundColor = "#EDE6D6";
@@ -302,6 +305,13 @@ export default function GroupPage() {
                 </ul>
               )}
             </div>
+
+            {!loading && group && (
+              <>
+                {/* existing content */}
+                <GroceryListsSection groupId={id} />
+              </>
+            )}
           </>
         )}
       </div>
