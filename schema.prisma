@@ -35,5 +35,21 @@ model Invite{
   senderId    String
   receiverId  String
   status      String
-  createdAt   String
+  createdAt   DateTime @default(now())
+}
+
+model GroceryList {
+  id          String    @id @default(uuid())
+  groupId     String
+}
+
+model GroceryItem {
+  id          String    @id @default(uuid())
+  listId      String
+  name        String
+  quantity    Int
+  price       Decimal
+  isCompleted Boolean
+  addedById   String
+  assignedId  String
 }
