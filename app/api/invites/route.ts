@@ -1,23 +1,27 @@
-// app/api/invites/route.ts
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
-import { readDb, writeDb } from '@/lib/db'
 import { verifySessionToken } from '@/lib/session'
-import { randomUUID } from 'crypto'
-import { User, Invite } from '@/lib/types'
+import { prisma } from '@/lib/prisma'
 
-const DB_NAME = "invite"
-const USERS_DB_NAME = "users"
-
-// GET /api/invites — list invites for the signed-in user's phone number
-// Optionally pass ?number=xxx to look up invites for a specific number instead
+// GET /api/invites — list invites for the signed-in user
+// Optionally pass ?number=xxx to look up invites for a specific phone number instead
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
   const numberParam = searchParams.get('number')
 
-  let targetNumber = numberParam
+  let targetUserId: string
 
-  if (!targetNumber) {
+  if (numberParam) {
+    // Phone isn't unique in the schema, so this could match multiple users.
+    // Using the first match — tighten this if that's not acceptable.
+    const user = await prisma.user.findFirst({
+      where: { phone: numberParam },
+    })
+    if (!user) {
+      return NextResponse.json({ error: 'No user found for that number' }, { status: 404 })
+    }
+    targetUserId = user.id
+  } else {
     const token = (await cookies()).get('session')?.value
     if (!token) {
       return NextResponse.json({ error: 'Not signed in' }, { status: 401 })
@@ -28,17 +32,20 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Session expired' }, { status: 401 })
     }
 
-    const usersDb = readDb<User>(USERS_DB_NAME) ?? { items: [] }
-    const user = usersDb.items.find(u => u.id === payload.userId)
+    const user = await prisma.user.findUnique({
+      where: { id: payload.userId },
+    })
     if (!user) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 })
     }
 
-    targetNumber = user.phone
+    targetUserId = user.id
   }
 
-  const db = readDb<Invite>(DB_NAME) ?? { items: [] }
-  const invites = db.items.filter(invite => invite.number === targetNumber)
+  const invites = await prisma.invite.findMany({
+    where: { receiverId: targetUserId },
+    orderBy: { createdAt: 'desc' },
+  })
 
   return NextResponse.json(invites)
 }
@@ -61,26 +68,33 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'group_id and number are required' }, { status: 400 })
   }
 
-  const db = readDb<Invite>(DB_NAME) ?? { items: [] }
+  // Resolve the phone number to a receiving user
+  const receiver = await prisma.user.findFirst({
+    where: { phone: number },
+  })
+  if (!receiver) {
+    return NextResponse.json({ error: 'No user found for that number' }, { status: 404 })
+  }
 
-  const existing = db.items.find(
-    invite => invite.group_id === group_id && invite.number === number
-  )
+  const existing = await prisma.invite.findFirst({
+    where: { groupId: group_id, receiverId: receiver.id },
+  })
   if (existing) {
-    return NextResponse.json({ error: 'An invite for this number already exists for this group' }, { status: 409 })
+    return NextResponse.json(
+      { error: 'An invite for this number already exists for this group' },
+      { status: 409 }
+    )
   }
 
-  const newInvite: Invite = {
-    id: randomUUID(),
-    group_id,
-    number,
-    invitedBy: session.userId,
-    status: 'pending',
-    createdAt: new Date().toISOString(),
-  }
-
-  db.items.push(newInvite)
-  writeDb(DB_NAME, db)
+  const newInvite = await prisma.invite.create({
+    data: {
+      groupId: group_id,
+      senderId: session.userId,
+      receiverId: receiver.id,
+      status: 'pending',
+      createdAt: new Date().toISOString(),
+    },
+  })
 
   return NextResponse.json(newInvite, { status: 201 })
 }

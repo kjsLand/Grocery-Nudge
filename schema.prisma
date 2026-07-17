@@ -11,7 +11,7 @@ model User {
   id           String   @id @default(uuid())
   email        String   @unique
   passwordHash String
-  phone        String
+  phone        String   @unique
   createdAt    DateTime @default(now())
 }
 
@@ -27,4 +27,13 @@ model UserGroups {
   id          String    @id @default(uuid())
   userId      String
   groupId     String
+}
+
+model Invite{
+  id          String    @id @default(uuid())
+  groupId     String
+  senderId    String
+  receiverId  String
+  status      String
+  createdAt   String
 }

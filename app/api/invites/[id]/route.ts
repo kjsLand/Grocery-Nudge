@@ -1,10 +1,7 @@
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
-import { readDb, writeDb } from '@/lib/db'
 import { verifySessionToken } from '@/lib/session'
-import { Invite } from '@/lib/types'
-
-const DB_NAME = "invite"
+import { prisma } from '@/lib/prisma'
 
 async function requireUser() {
   const cookieStore = await cookies()
@@ -12,7 +9,6 @@ async function requireUser() {
   if (!token) return null
   return verifySessionToken(token)
 }
-
 
 // DELETE /api/invites/:id — delete/revoke an invite
 export async function DELETE(
@@ -25,15 +21,17 @@ export async function DELETE(
   }
 
   const { id } = await params
-  const db = readDb<Invite>(DB_NAME)
-  const invite = db.items.find((i) => i.id === id)
 
+  const invite = await prisma.invite.findUnique({ where: { id } })
   if (!invite) {
     return NextResponse.json({ error: 'Invite not found' }, { status: 404 })
   }
 
-  db.items = db.items.filter((i) => i.id !== id)
-  writeDb(DB_NAME, db)
+  if (invite.senderId != payload.userId && invite.receiverId != payload.userId) {
+    return NextResponse.json({ error: 'Not the owner of invite' }, { status: 403 })
+  }
+
+  await prisma.invite.delete({ where: { id } })
 
   return NextResponse.json({ success: true })
 }

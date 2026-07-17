@@ -23,13 +23,21 @@ const courierPrime = Courier_Prime({
   variable: '--font-mono',
 })
 
+// Matches the Invite model: groupId / senderId / receiverId, status is a
+// plain string in the schema (not an enum), createdAt is stored as a string.
 type Invite = {
   id: string
-  group_id: string
-  number: string
-  invitedBy: string
-  status: 'pending' | 'accepted'
+  groupId: string
+  senderId: string
+  receiverId: string
+  status: string
   createdAt: string
+}
+
+type Group = {
+  id: string
+  title: string
+  leaderId: string
 }
 
 type UserAccount = {
@@ -42,15 +50,24 @@ export default function Invites() {
   const router = useRouter();
 
   const [invites, setInvites] = useState<Invite[]>([])
+  const [groups, setGroups] = useState<Group[]>([])
   const [number, setNumber] = useState('')
   const [groupId, setGroupId] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [isSending, setIsSending] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
+  const [isLoadingGroups, setIsLoadingGroups] = useState(true)
   const [pendingActionId, setPendingActionId] = useState<string | null>(null)
 
   const [user, setUser] = useState<UserAccount | null>(null);
   const [profileStatus, setProfileStatus] = useState<"loading" | "ready" | "error">("loading");
+
+  // groupId -> title, so the list can show a name instead of a raw id
+  const groupNameById = new Map(groups.map(g => [g.id, g.title]))
+
+  function groupName(id: string) {
+    return groupNameById.get(id) ?? id
+  }
 
   async function loadInvites() {
     try {
@@ -64,8 +81,23 @@ export default function Invites() {
     }
   }
 
+  async function loadGroups() {
+    try {
+      const response = await fetch('/api/groups')
+      if (response.ok) {
+        const data = await response.json()
+        setGroups(data)
+        // default the form's group select to the first group once loaded
+        setGroupId(prev => prev || (data[0]?.id ?? ''))
+      }
+    } finally {
+      setIsLoadingGroups(false)
+    }
+  }
+
   useEffect(() => {
     loadInvites()
+    loadGroups()
   }, [])
 
   useEffect(() => {
@@ -95,6 +127,12 @@ export default function Invites() {
   async function handleSend(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     setError(null)
+
+    if (!groupId) {
+      setError('pick a group first')
+      return
+    }
+
     setIsSending(true)
 
     try {
@@ -123,7 +161,7 @@ export default function Invites() {
   async function handleAccept(invite: Invite) {
     setPendingActionId(invite.id)
     try {
-      const response = await fetch(`/api/groups/${invite.group_id}/members`, {
+      const response = await fetch(`/api/groups/${invite.groupId}/members`, {
         method: 'POST',
       })
       if (response.ok) {
@@ -165,15 +203,25 @@ export default function Invites() {
               <p className="eyebrow">— send one —</p>
               <form onSubmit={handleSend} className="form" noValidate>
                 <label className="field">
-                  <span className="label">Group ID</span>
-                  <input
-                    name="group_id"
-                    type="text"
-                    required
-                    value={groupId}
-                    onChange={e => setGroupId(e.target.value)}
-                    placeholder="which group is this for?"
-                  />
+                  <span className="label">Group</span>
+                  {isLoadingGroups ? (
+                    <span className="empty">loading groups…</span>
+                  ) : groups.length === 0 ? (
+                    <span className="empty">no groups yet — make one first</span>
+                  ) : (
+                    <select
+                      name="group_id"
+                      required
+                      value={groupId}
+                      onChange={e => setGroupId(e.target.value)}
+                    >
+                      {groups.map(group => (
+                        <option key={group.id} value={group.id}>
+                          {group.title}
+                        </option>
+                      ))}
+                    </select>
+                  )}
                 </label>
 
                 <label className="field">
@@ -190,7 +238,7 @@ export default function Invites() {
 
                 {error && <p className="error">{error}</p>}
 
-                <button type="submit" className="stamp" disabled={isSending}>
+                <button type="submit" className="stamp" disabled={isSending || groups.length === 0}>
                   {isSending ? 'sending…' : 'Send invite'}
                 </button>
               </form>
@@ -210,11 +258,15 @@ export default function Invites() {
                   {invites.map(invite => (
                     <li key={invite.id} className="item">
                       <div className="item-info">
-                        <span className="item-number">{invite.number}</span>
+                        {/* The Invite model only stores receiverId, not a phone
+                            number. Showing the id for now — if /api/invites
+                            starts returning the receiver's phone/email (e.g.
+                            via a Prisma `include`), swap this for that. */}
+                        <span className="item-number">invited: {invite.receiverId}</span>
                         <span className={`item-status status-${invite.status}`}>
                           {invite.status}
                         </span>
-                        <span className="item-group">group: {invite.group_id}</span>
+                        <span className="item-group">group: {groupName(invite.groupId)}</span>
                       </div>
                       <div className="item-actions">
                         {invite.status !== 'accepted' && (
@@ -353,7 +405,8 @@ export default function Invites() {
           color: var(--graphite);
         }
 
-        .field input {
+        .field input,
+        .field select {
           font-family: var(--font-serif);
           font-size: 17px;
           color: var(--ink);
@@ -364,15 +417,24 @@ export default function Invites() {
           outline: none;
         }
 
+        .field select {
+          appearance: none;
+          -webkit-appearance: none;
+          border-radius: 0;
+          cursor: pointer;
+        }
+
         .field input::placeholder {
           color: rgba(34, 40, 59, 0.35);
         }
 
-        .field input:focus {
+        .field input:focus,
+        .field select:focus {
           border-bottom: 1px solid var(--wax-red);
         }
 
-        .field input:focus-visible {
+        .field input:focus-visible,
+        .field select:focus-visible {
           outline: 2px solid var(--wax-red);
           outline-offset: 3px;
         }
