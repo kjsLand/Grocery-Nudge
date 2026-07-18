@@ -49,6 +49,10 @@ export function GroceryListsSection({ groupId }: { groupId: string }) {
   const [addingItemFor, setAddingItemFor] = useState<string | null>(null);
   const [addItemError, setAddItemError] = useState<Record<string, string | null>>({});
 
+  // Tracks which item id is currently being deleted (null = none)
+  const [deletingItemId, setDeletingItemId] = useState<string | null>(null);
+  const [deleteItemError, setDeleteItemError] = useState<Record<string, string | null>>({});
+
   useEffect(() => {
     if (!groupId) return;
 
@@ -207,6 +211,33 @@ export function GroceryListsSection({ groupId }: { groupId: string }) {
     }
   }
 
+  async function handleDeleteItem(listId: string, itemId: string) {
+    setDeletingItemId(itemId);
+    setDeleteItemError((s) => ({ ...s, [listId]: null }));
+    try {
+      const res = await fetch(`/api/grocery/${listId}/items/${itemId}`, {
+        method: "DELETE",
+      });
+      const contentType = res.headers.get("content-type") ?? "";
+      const data = contentType.includes("application/json") ? await res.json() : null;
+      if (!res.ok) throw new Error(data?.error || "Failed to delete item");
+
+      // Remove the item locally instead of refetching
+      setItemsByList((s) => ({
+        ...s,
+        [listId]: (s[listId] ?? []).filter((i) => i.id !== itemId),
+      }));
+    } catch (err) {
+      console.error(err);
+      setDeleteItemError((s) => ({
+        ...s,
+        [listId]: err instanceof Error ? err.message : "Something went wrong",
+      }));
+    } finally {
+      setDeletingItemId(null);
+    }
+  }
+
   return (
     <div
       className="mt-6 rounded-sm px-6 py-5 shadow-[3px_4px_0_rgba(43,43,46,0.08)]"
@@ -316,9 +347,22 @@ export function GroceryListsSection({ groupId }: { groupId: string }) {
                             {item.price > 0 && (
                               <span className="text-[#8A8578]">${item.price}</span>
                             )}
+                            <button
+                              onClick={() => handleDeleteItem(l.id, item.id)}
+                              disabled={deletingItemId === item.id}
+                              aria-label="Delete item"
+                              title="Delete item"
+                              className="ml-auto flex items-center gap-1 rounded-sm px-1.5 py-0.5 text-[#B33A3A] hover:bg-[#B33A3A]/10 disabled:opacity-40"
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </button>
                           </li>
                         ))}
                       </ul>
+                    )}
+
+                    {deleteItemError[l.id] && (
+                      <p className="mb-2 text-xs text-[#B33A3A]">{deleteItemError[l.id]}</p>
                     )}
 
                     {/* Add item form */}
