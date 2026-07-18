@@ -57,7 +57,7 @@ export async function GET(
 }
 
 // POST /api/grocery/[id]/items — add a new item to the list
-// Body: { name: string, quantity: number, price?: string, assignedId?: string }
+// Body: { name: string, quantity: number, price?: number, assignedId?: string }
 export async function POST(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
@@ -78,7 +78,6 @@ export async function POST(
     return NextResponse.json({ error: "quantity is required" }, { status: 400 });
   }
 
-  console.log(body.price);
   const item = await prisma.groceryItem.create({
     data: {
       listId: list!.id,
