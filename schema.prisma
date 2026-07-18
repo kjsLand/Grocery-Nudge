@@ -48,7 +48,7 @@ model GroceryItem {
   listId      String
   name        String
   quantity    Int
-  price       Decimal
+  price       String
   isCompleted Boolean
   addedById   String
   assignedId  String
