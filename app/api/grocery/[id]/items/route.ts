@@ -86,7 +86,7 @@ export async function POST(
       price: body.price ?? 0,
       isCompleted: false,
       addedById: auth.userId,
-      assignedId: body.assignedId ?? auth.userId,
+      assignedId: body.assignedId ?? "",
     },
   });
 

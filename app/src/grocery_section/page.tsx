@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Plus, ShoppingBasket, Trash2, ChevronDown, ChevronRight } from "lucide-react";
+import { Plus, ShoppingBasket, Trash2, ChevronDown, ChevronRight, UserCheck } from "lucide-react";
 
 type GroceryList = {
   id: string;
@@ -52,6 +52,12 @@ export function GroceryListsSection({ groupId }: { groupId: string }) {
   // Tracks which item id is currently being deleted (null = none)
   const [deletingItemId, setDeletingItemId] = useState<string | null>(null);
   const [deleteItemError, setDeleteItemError] = useState<Record<string, string | null>>({});
+
+  // Assign-to form state, keyed by itemId (draft text before saving)
+  const [assignDraft, setAssignDraft] = useState<Record<string, string>>({});
+  // Tracks which item id currently has an assign PATCH in flight
+  const [assigningItemId, setAssigningItemId] = useState<string | null>(null);
+  const [assignItemError, setAssignItemError] = useState<Record<string, string | null>>({});
 
   useEffect(() => {
     if (!groupId) return;
@@ -238,6 +244,37 @@ export function GroceryListsSection({ groupId }: { groupId: string }) {
     }
   }
 
+  async function handleAssignItem(listId: string, itemId: string) {
+    const assignedId = (assignDraft[itemId] ?? "").trim();
+
+    setAssigningItemId(itemId);
+    setAssignItemError((s) => ({ ...s, [itemId]: null }));
+    try {
+      const res = await fetch(`/api/grocery/${listId}/items/${itemId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ assignedId }),
+      });
+      const contentType = res.headers.get("content-type") ?? "";
+      const data = contentType.includes("application/json") ? await res.json() : null;
+      if (!res.ok) throw new Error(data?.error || "Failed to update assignment");
+
+      // Update the item locally instead of refetching
+      setItemsByList((s) => ({
+        ...s,
+        [listId]: (s[listId] ?? []).map((i) => (i.id === itemId ? { ...i, assignedId } : i)),
+      }));
+    } catch (err) {
+      console.error(err);
+      setAssignItemError((s) => ({
+        ...s,
+        [itemId]: err instanceof Error ? err.message : "Something went wrong",
+      }));
+    } finally {
+      setAssigningItemId(null);
+    }
+  }
+
   return (
     <div
       className="mt-6 rounded-sm px-6 py-5 shadow-[3px_4px_0_rgba(43,43,46,0.08)]"
@@ -339,23 +376,51 @@ export function GroceryListsSection({ groupId }: { groupId: string }) {
                     {!itemsLoading[l.id] && !itemsError[l.id] && items.length > 0 && (
                       <ul className="mb-3 space-y-1">
                         {items.map((item) => (
-                          <li key={item.id} className="flex items-center gap-2 text-xs">
-                            <span className={item.isCompleted ? "line-through text-[#8A8578]" : ""}>
-                              {item.name}
-                            </span>
-                            <span className="text-[#8A8578]">× {item.quantity}</span>
-                            {item.price > 0 && (
-                              <span className="text-[#8A8578]">${item.price}</span>
+                          <li key={item.id} className="flex flex-col gap-1 text-xs">
+                            <div className="flex items-center gap-2">
+                              <span className={item.isCompleted ? "line-through text-[#8A8578]" : ""}>
+                                {item.name}
+                              </span>
+                              <span className="text-[#8A8578]">× {item.quantity}</span>
+                              {item.price > 0 && (
+                                <span className="text-[#8A8578]">${item.price}</span>
+                              )}
+                              <button
+                                onClick={() => handleDeleteItem(l.id, item.id)}
+                                disabled={deletingItemId === item.id}
+                                aria-label="Delete item"
+                                title="Delete item"
+                                className="ml-auto flex items-center gap-1 rounded-sm px-1.5 py-0.5 text-[#B33A3A] hover:bg-[#B33A3A]/10 disabled:opacity-40"
+                              >
+                                <Trash2 className="h-3 w-3" />
+                              </button>
+                            </div>
+
+                            {/* Assign-to row */}
+                            <div className="flex items-center gap-1.5 pl-0.5">
+                              <UserCheck className="h-3 w-3 text-[#8A8578]" />
+                              <input
+                                type="text"
+                                placeholder="Assign to user id"
+                                value={assignDraft[item.id] ?? item.assignedId ?? ""}
+                                onChange={(e) =>
+                                  setAssignDraft((s) => ({ ...s, [item.id]: e.target.value }))
+                                }
+                                className="w-32 rounded-sm border border-[#2B2B2E]/20 bg-white px-1.5 py-0.5 text-[11px] text-[#2B2B2E] outline-none focus:border-[#2B2B2E]/50"
+                              />
+                              <button
+                                onClick={() => handleAssignItem(l.id, item.id)}
+                                disabled={assigningItemId === item.id}
+                                className="rounded-sm bg-[#2B2B2E] px-1.5 py-0.5 text-[11px] text-[#FAF7ED] hover:bg-[#2B2B2E]/90 disabled:opacity-40"
+                              >
+                                {assigningItemId === item.id ? "assigning…" : "Assign"}
+                              </button>
+                            </div>
+                            {assignItemError[item.id] && (
+                              <p className="pl-0.5 text-[11px] text-[#B33A3A]">
+                                {assignItemError[item.id]}
+                              </p>
                             )}
-                            <button
-                              onClick={() => handleDeleteItem(l.id, item.id)}
-                              disabled={deletingItemId === item.id}
-                              aria-label="Delete item"
-                              title="Delete item"
-                              className="ml-auto flex items-center gap-1 rounded-sm px-1.5 py-0.5 text-[#B33A3A] hover:bg-[#B33A3A]/10 disabled:opacity-40"
-                            >
-                              <Trash2 className="h-3 w-3" />
-                            </button>
                           </li>
                         ))}
                       </ul>
