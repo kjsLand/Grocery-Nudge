@@ -3,25 +3,9 @@
 import { useState, type FormEvent } from 'react'
 import { useRouter } from 'next/navigation'
 import { Caveat, Source_Serif_4, Courier_Prime } from 'next/font/google'
-import { NudgeNavBar } from "../components/Nav"
+import { NudgeNavBar } from "../../components/Nav"
 
-const caveat = Caveat({
-  subsets: ['latin'],
-  weight: ['500', '700'],
-  variable: '--font-caveat',
-})
-const sourceSerif = Source_Serif_4({
-  subsets: ['latin'],
-  weight: ['400', '600'],
-  variable: '--font-serif',
-})
-const courierPrime = Courier_Prime({
-  subsets: ['latin'],
-  weight: ['400', '700'],
-  variable: '--font-mono',
-})
-
-export default function RegisterPage() {
+export default function LoginPage() {
   const router = useRouter()
   const [error, setError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -33,18 +17,17 @@ export default function RegisterPage() {
 
     const formData = new FormData(event.currentTarget)
     const email = formData.get('email')
-    const phone = formData.get('phone')
     const password = formData.get('password')
 
     try {
-      const response = await fetch('/api/auth/register', {
+      const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, phone, password }),
+        body: JSON.stringify({ email, password }),
       })
 
       if (response.ok) {
-        router.push('/src/login')
+        router.push('/src/groups')
         return
       }
 
@@ -58,7 +41,7 @@ export default function RegisterPage() {
   }
 
   function handleSignUpClick() {
-    router.push('/src/login')
+    router.push('/src/register')
   }
 
   return (
@@ -67,8 +50,9 @@ export default function RegisterPage() {
       <div>
         <div className="margin-rule" />
         <div className="content">
-          <p className="eyebrow">— private notebook —</p>
-          <h1 className="title">Create an Account!</h1>
+          <p className="eyebrow">— testing notebook —</p>
+          <h1 className="title">Sign in</h1>
+          <p className="sub">Pick up where you left off.</p>
 
           <form onSubmit={handleSubmit} className="form" noValidate>
             <label className="field">
@@ -77,13 +61,8 @@ export default function RegisterPage() {
             </label>
 
             <label className="field">
-              <span className="label">Phone Number</span>
-              <input name="phone" type="tel" required autoComplete="tel" placeholder="(555) 555-5555" />
-            </label>
-
-            <label className="field">
               <span className="label">Password</span>
-              <input name="password" type="password" required autoComplete="new-password" />
+              <input name="password" type="password" required autoComplete="current-password" />
             </label>
 
             {error && <p className="error">{error}</p>}
@@ -91,11 +70,15 @@ export default function RegisterPage() {
             <button type="submit" className="stamp" disabled={isSubmitting}>
               {isSubmitting ? 'checking…' : 'Enter'}
             </button>
-
-            <button type="button" onClick={handleSignUpClick} className="signup-link">
-              Already have an account?
-            </button>
           </form>
+
+          <a href="#" className="forgot">
+            forgot your password?
+          </a>
+
+          <button type="button" onClick={handleSignUpClick} className="signup-link">
+            Don&apos;t have an account? Sign up
+          </button>
         </div>
       </div>
 
@@ -256,6 +239,21 @@ export default function RegisterPage() {
         .forgot {
           display: inline-block;
           margin-top: 28px;
+          font-family: var(--font-serif);
+          font-size: 13px;
+          color: var(--graphite);
+          text-decoration: underline;
+          text-decoration-style: wavy;
+          text-underline-offset: 3px;
+        }
+
+        .signup-link {
+          display: block;
+          margin-top: 12px;
+          background: none;
+          border: none;
+          padding: 0;
+          cursor: pointer;
           font-family: var(--font-serif);
           font-size: 13px;
           color: var(--graphite);

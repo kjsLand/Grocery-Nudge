@@ -3,7 +3,7 @@
 import { useState, type FormEvent } from 'react'
 import { useRouter } from 'next/navigation'
 import { Caveat, Source_Serif_4, Courier_Prime } from 'next/font/google'
-import { NudgeNavBar } from "../components/Nav"
+import { NudgeNavBar } from "../../components/Nav"
 
 const caveat = Caveat({
   subsets: ['latin'],
@@ -21,7 +21,7 @@ const courierPrime = Courier_Prime({
   variable: '--font-mono',
 })
 
-export default function LoginPage() {
+export default function RegisterPage() {
   const router = useRouter()
   const [error, setError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -33,17 +33,18 @@ export default function LoginPage() {
 
     const formData = new FormData(event.currentTarget)
     const email = formData.get('email')
+    const phone = formData.get('phone')
     const password = formData.get('password')
 
     try {
-      const response = await fetch('/api/auth/login', {
+      const response = await fetch('/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, phone, password }),
       })
 
       if (response.ok) {
-        router.push('/src/groups')
+        router.push('/src/login')
         return
       }
 
@@ -57,7 +58,7 @@ export default function LoginPage() {
   }
 
   function handleSignUpClick() {
-    router.push('/src/register')
+    router.push('/src/login')
   }
 
   return (
@@ -67,8 +68,7 @@ export default function LoginPage() {
         <div className="margin-rule" />
         <div className="content">
           <p className="eyebrow">— private notebook —</p>
-          <h1 className="title">Sign in</h1>
-          <p className="sub">Pick up where you left off.</p>
+          <h1 className="title">Create an Account!</h1>
 
           <form onSubmit={handleSubmit} className="form" noValidate>
             <label className="field">
@@ -77,8 +77,13 @@ export default function LoginPage() {
             </label>
 
             <label className="field">
+              <span className="label">Phone Number</span>
+              <input name="phone" type="tel" required autoComplete="tel" placeholder="(555) 555-5555" />
+            </label>
+
+            <label className="field">
               <span className="label">Password</span>
-              <input name="password" type="password" required autoComplete="current-password" />
+              <input name="password" type="password" required autoComplete="new-password" />
             </label>
 
             {error && <p className="error">{error}</p>}
@@ -86,15 +91,11 @@ export default function LoginPage() {
             <button type="submit" className="stamp" disabled={isSubmitting}>
               {isSubmitting ? 'checking…' : 'Enter'}
             </button>
+
+            <button type="button" onClick={handleSignUpClick} className="signup-link">
+              Already have an account?
+            </button>
           </form>
-
-          <a href="#" className="forgot">
-            forgot your password?
-          </a>
-
-          <button type="button" onClick={handleSignUpClick} className="signup-link">
-            Don&apos;t have an account? Sign up
-          </button>
         </div>
       </div>
 
@@ -255,21 +256,6 @@ export default function LoginPage() {
         .forgot {
           display: inline-block;
           margin-top: 28px;
-          font-family: var(--font-serif);
-          font-size: 13px;
-          color: var(--graphite);
-          text-decoration: underline;
-          text-decoration-style: wavy;
-          text-underline-offset: 3px;
-        }
-
-        .signup-link {
-          display: block;
-          margin-top: 12px;
-          background: none;
-          border: none;
-          padding: 0;
-          cursor: pointer;
           font-family: var(--font-serif);
           font-size: 13px;
           color: var(--graphite);
