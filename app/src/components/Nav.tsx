@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { colors } from "../theme/tokens";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Users, Mail, ScanLine, LogOut, Settings } from "lucide-react";
@@ -27,7 +28,7 @@ export function NudgeNavBar({ landing_only = false }: NudgeNavBarProps) {
     try {
       await fetch("/api/auth/logout", { method: "POST" });
     } finally {
-      router.push("/src/login");
+      router.push("/src/auth/login");
     }
   }
 
@@ -39,19 +40,13 @@ export function NudgeNavBar({ landing_only = false }: NudgeNavBarProps) {
         .nudge-nav {
           position: relative;
           width: 100%;
-          background: #E4DEC9;
+          background: #F4EFE6;
           display: flex;
           align-items: center;
           justify-content: space-between;
           padding: 1rem 2rem;
           box-sizing: border-box;
           box-shadow: 0 6px 0 #D8CFB0, 0 8px 14px rgba(42,59,85,0.15);
-          transform: rotate(-0.4deg);
-          clip-path: polygon(
-            0% 2%, 3% 0%, 8% 1.5%, 14% 0%, 20% 1.2%, 26% 0%, 32% 1.5%,
-            38% 0%, 44% 1%, 50% 0%, 56% 1.4%, 62% 0%, 68% 1%, 74% 0%,
-            80% 1.5%, 86% 0%, 92% 1%, 97% 0%, 100% 2%, 100% 100%, 0% 100%
-          );
         }
 
         .nudge-wordmark {

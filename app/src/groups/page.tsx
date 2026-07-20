@@ -56,7 +56,7 @@ export default function DashboardPage() {
       try {
         const response = await fetch("/api/auth/me");
         if (!response.ok) {
-          if (!cancelled) router.push("/src/login");
+          if (!cancelled) router.push("/src/auth/login");
           return;
         }
         const data = await response.json();

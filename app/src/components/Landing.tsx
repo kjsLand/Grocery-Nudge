@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation"; // App Router (Next 13+)
+import { NudgeNavBar } from "./Nav"
 
 type GroceryItem = {
   id: string;
@@ -236,22 +237,7 @@ export default function Landing() {
         href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Caveat:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap"
       />
 
-      <header>
-        <nav className="wrap">
-          <div className="logo">
-            <span className="dot" /> Nudge
-          </div>
-          <div className="nav-links">
-            <button onClick={() => scrollTo(listsRef)}>Shared lists</button>
-            <button onClick={() => scrollTo(eventsRef)}>Events</button>
-            <button onClick={() => scrollTo(receiptsRef)}>Receipts</button>
-            <button onClick={() => scrollTo(somedayRef)}>Roadmap</button>
-          </div>
-          <button className="btn" onClick={() => scrollTo(signupRef)}>
-            Get early access
-          </button>
-        </nav>
-      </header>
+      <NudgeNavBar landing_only={true}/>
 
       {/* HERO */}
       <section className="hero wrap">
