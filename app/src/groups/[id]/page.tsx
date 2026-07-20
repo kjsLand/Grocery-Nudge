@@ -6,6 +6,7 @@ import { Kalam, Special_Elite, Courier_Prime } from "next/font/google";
 import { Users, LogIn, LogOut, Trash2, ArrowLeft } from "lucide-react";
 import { NudgeNavBar } from "../../components/Nav"
 import { GroceryListsSection } from "../../grocery_section/page";
+import GroupHero from "@/app/src/components/ui/GroupHero"
 
 const handwritten = Kalam({ subsets: ["latin"], weight: ["400", "700"], variable: "--font-hand" });
 const typewriter = Special_Elite({ subsets: ["latin"], weight: "400", variable: "--font-type" });
@@ -197,50 +198,17 @@ export default function GroupPage() {
     >
     <NudgeNavBar />
 
-      <div className="mx-auto max-w-3xl px-6 py-12">
-        <button
-          onClick={() => router.push("/src/groups")}
-          className="mb-8 flex items-center gap-1.5 text-sm text-[#8A8578] hover:text-[#2B2B2E]"
-          style={{ fontFamily: "var(--font-type)" }}
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Back to groups
-        </button>
-
-        {loading && (
-          <p className="text-sm text-[#8A8578]" style={{ fontFamily: "var(--font-type)" }}>
-            loading…
-          </p>
-        )}
-
-        {!loading && loadError && (
-          <div
-            className="rounded-sm px-6 py-5 shadow-[3px_4px_0_rgba(43,43,46,0.08)]"
-            style={{ backgroundColor: "#FAF7ED" }}
-          >
-            <h2 className="text-2xl text-[#2B2B2E]" style={{ fontFamily: "var(--font-hand)" }}>
-              Couldn&apos;t find that group
-            </h2>
-            <p className="mt-1 text-sm text-[#8A8578]" style={{ fontFamily: "var(--font-type)" }}>
-              {loadError}
-            </p>
-          </div>
-        )}
+    <div className="mx-auto max-w-3xl px-6 py-12">
+      <GroupHero 
+        groupName = "test"
+        description = "Lorem Epsum"
+        memberCount = {members.length}
+        imageUrl = ""
+        onBack = "src/groups"
+      />
 
         {!loading && group && (
           <>
-            <div className="mb-8 flex items-end justify-between border-b-2 border-dashed border-[#8A8578]/40 pb-6">
-              <h1 className="text-5xl leading-none text-[#2B2B2E]" style={{ fontFamily: "var(--font-hand)" }}>
-                {group.title}
-              </h1>
-              <div
-                className="mb-1 flex items-center gap-1.5 text-sm text-[#8A8578]"
-                style={{ fontFamily: "var(--font-type)" }}
-              >
-                <Users className="h-4 w-4" strokeWidth={1.75} />
-                {members.length} member{members.length === 1 ? "" : "s"}
-              </div>
-            </div>
 
             {actionError && (
               <p className="mb-4 text-sm text-[#B33A3A]" style={{ fontFamily: "var(--font-type)" }}>
