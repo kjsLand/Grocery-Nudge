@@ -41,7 +41,7 @@ const TextField = forwardRef<HTMLInputElement, TextFieldProps>(
     const isControlled = value !== undefined;
 
     return (
-      <div style={{ marginBottom: "22px" }}>
+      <div style={{ marginBottom: "2px" }}>
         <div
           style={{
             display: "flex",
@@ -93,7 +93,7 @@ const TextField = forwardRef<HTMLInputElement, TextFieldProps>(
               borderBottom: `1px solid ${borderColor}`,
               color: colors.ink,
               fontSize: "14px",
-              fontFamily: "inherit",
+              fontFamily: "Special Elite",
               padding: endAdornment ? "8px 28px 8px 2px" : "8px 2px",
               transition: "border-color 150ms ease",
               outline: "none",

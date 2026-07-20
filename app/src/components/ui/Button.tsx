@@ -107,7 +107,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
           justifyContent: "center",
           gap: "8px",
           fontSize: "13px",
-          fontFamily: "inherit",
+          fontFamily: 'Special Elite',
           letterSpacing: "0.05em",
           padding: "10px 20px",
           borderRadius: "2px",

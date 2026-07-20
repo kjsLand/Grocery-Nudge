@@ -91,7 +91,7 @@ export default function Panel({ eyebrow, title, subtitle, children }: PanelProps
         }
 
         .eyebrow {
-          font-family: var(--font-mono);
+          font-family: 'Special Elite', monospace;
           font-size: 11px;
           letter-spacing: 0.12em;
           text-transform: uppercase;
@@ -100,7 +100,7 @@ export default function Panel({ eyebrow, title, subtitle, children }: PanelProps
         }
 
         .title {
-          font-family: var(--font-caveat);
+          font-family: 'Special Elite', monospace;
           font-weight: 700;
           font-size: 52px;
           line-height: 1;

@@ -43,7 +43,7 @@ export default function LoginPage() {
   }
 
   function handleSignUpClick() {
-    router.push('/src/register')
+    router.push('/src/auth/register')
   }
 
   return (
@@ -86,41 +86,6 @@ export default function LoginPage() {
           gap: 24px;
         }
 
-        .error {
-          font-family: var(--font-caveat);
-          font-size: 19px;
-          color: var(--wax-red);
-          margin: -8px 0 0;
-        }
-
-        .stamp {
-          align-self: flex-start;
-          margin-top: 4px;
-          font-family: var(--font-mono);
-          font-size: 13px;
-          font-weight: 700;
-          letter-spacing: 0.1em;
-          text-transform: uppercase;
-          color: var(--wax-red);
-          background: transparent;
-          border: 3px double var(--wax-red);
-          border-radius: 44% 42% 40% 45% / 50% 45% 50% 45%;
-          padding: 10px 26px;
-          cursor: pointer;
-          transform: rotate(-3deg);
-          transition: background 0.15s ease, color 0.15s ease;
-        }
-
-        .stamp:hover:not(:disabled) {
-          background: var(--wax-red);
-          color: var(--paper);
-        }
-
-        .stamp:disabled {
-          opacity: 0.5;
-          cursor: not-allowed;
-        }
-
         .signup-link {
           display: block;
           margin-top: 20px;
@@ -134,12 +99,6 @@ export default function LoginPage() {
           text-decoration: underline;
           text-decoration-style: wavy;
           text-underline-offset: 3px;
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-          .stamp {
-            transition: none;
-          }
         }
       `}</style>
     </main>
