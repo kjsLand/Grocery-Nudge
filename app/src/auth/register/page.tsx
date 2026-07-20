@@ -30,7 +30,7 @@ export default function RegisterPage() {
       })
 
       if (response.ok) {
-        router.push('/src/login')
+        router.push('/src/auth/login')
         return
       }
 
