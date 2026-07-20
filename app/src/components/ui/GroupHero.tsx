@@ -4,11 +4,12 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Users } from "lucide-react";
 import { colors, fonts, spacing, radii } from "@/app/src/theme/tokens";
+import { Members } from "./Members";
 
 interface GroupHeroProps {
   groupName: string;
   description: string;
-  memberCount: number;
+  group_id: string;
   imageUrl?: string;
   onBack: string;
 }
@@ -16,7 +17,7 @@ interface GroupHeroProps {
 export default function GroupHero({
   groupName = "test",
   description = "Lorem Epsum",
-  memberCount,
+  group_id,
   imageUrl,
   onBack,
 }: GroupHeroProps) {
@@ -124,9 +125,10 @@ export default function GroupHero({
               fontFamily: fonts.body,
               fontSize: "0.8rem",
             }}
-          >
-            <Users size={14} strokeWidth={1.75} />
-            {memberCount} member{memberCount === 1 ? "" : "s"}
+            >
+
+            
+            <Members id={group_id} />
           </div>
         </div>
       </div>

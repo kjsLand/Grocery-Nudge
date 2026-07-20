@@ -200,10 +200,10 @@ export default function GroupPage() {
 
     <div className="mx-auto max-w-3xl px-6 py-12">
       <GroupHero 
-        groupName = "test"
-        description = "Lorem Epsum"
-        memberCount = {members.length}
-        imageUrl = ""
+        groupName = "test" // TO-DO: add dynmaic group name
+        description = "Lorem Epsum" // TO-DO: add description in database
+        group_id = {id}
+        imageUrl = "" // TO-DO: add image to database
         onBack = "src/groups"
       />
 
