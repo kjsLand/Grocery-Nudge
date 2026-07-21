@@ -133,60 +133,6 @@ export default function GroupPage() {
     // membersVersion is a manual trigger — bumped after join/leave so this refetches
   }, [id, membersVersion]);
 
-  async function handleJoin() {
-    if (!id) return;
-    setActionBusy("join");
-    setActionError(null);
-    try {
-      const res = await fetch(`/api/groups/${id}/members`, { method: "POST" });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data?.error || "Failed to join group");
-      setGroup(data);
-      setMembersVersion((v) => v + 1);
-    } catch (err) {
-      console.error(err);
-      setActionError(err instanceof Error ? err.message : "Something went wrong");
-    } finally {
-      setActionBusy(null);
-    }
-  }
-
-  async function handleLeave() {
-    if (!id) return;
-    setActionBusy("leave");
-    setActionError(null);
-    try {
-      const res = await fetch(`/api/groups/${id}/members`, { method: "DELETE" });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data?.error || "Failed to leave group");
-      setGroup(data);
-      setMembersVersion((v) => v + 1);
-    } catch (err) {
-      console.error(err);
-      setActionError(err instanceof Error ? err.message : "Something went wrong");
-    } finally {
-      setActionBusy(null);
-    }
-  }
-
-  async function handleDeleteGroup() {
-    if (!id) return;
-    if (!window.confirm("Delete this group? This can't be undone.")) return;
-    setActionBusy("delete");
-    setActionError(null);
-    try {
-      const res = await fetch(`/api/groups/${id}`, { method: "DELETE" });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data?.error || "Failed to delete group");
-      router.push("/src/groups");
-    } catch (err) {
-      console.error(err);
-      setActionError(err instanceof Error ? err.message : "Something went wrong");
-    } finally {
-      setActionBusy(null);
-    }
-  }
-
   const isMember = !!user && members.some((m) => m.id === user.id);
 
   return (
@@ -217,7 +163,7 @@ export default function GroupPage() {
                 {actionError}
               </p>
             )}
-            
+
             {/* Members */}
             <div
               className="rounded-sm px-6 py-5 shadow-[3px_4px_0_rgba(43,43,46,0.08)]"

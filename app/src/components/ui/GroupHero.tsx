@@ -150,21 +150,22 @@ export default function GroupHero({
               />
             </div>
           </div>
+
+        <p
+            style={{
+            marginTop: spacing.md,
+            marginBottom: 0,
+            color: colors.slate,
+            fontFamily: fonts.body,
+            fontSize: "0.95rem",
+            lineHeight: 1.6,
+            }}
+        >
+            {description}
+        </p>
         </div>
       </div>
 
-      <p
-        style={{
-          marginTop: spacing.md,
-          marginBottom: 0,
-          color: colors.slate,
-          fontFamily: fonts.body,
-          fontSize: "0.95rem",
-          lineHeight: 1.6,
-        }}
-      >
-        {description}
-      </p>
     </section>
   );
 }
