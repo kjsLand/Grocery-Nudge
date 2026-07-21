@@ -7,23 +7,57 @@ import { colors, fonts, spacing, radii } from "@/app/src/theme/tokens";
 import { Members } from "./Members";
 import LeaveButton from "./LeaveGroupButton";
 import DeleteButton from "./DeleteGroupButton";
+import { useState, useEffect } from "react";
 
 interface GroupHeroProps {
-  groupName: string;
-  description: string;
   group_id: string;
-  imageUrl?: string;
   onBack: string;
 }
 
 export default function GroupHero({
-  groupName = "test",
-  description = "Lorem Epsum",
   group_id,
-  imageUrl,
   onBack,
 }: GroupHeroProps) {
   const router = useRouter();
+  const [type, setType] = useState("");
+  const [title, setTitle] = useState("");
+  const [descr, setDescr] = useState("");
+  const [img, setImg] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+
+useEffect(() => {
+  if (!group_id) return;
+  let cancelled = false;
+
+  async function loadGroup() {
+    setLoading(true);
+    setLoadError(null);
+    try {
+      const res = await fetch(`/api/groups/${group_id}`);
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data?.error || "Failed to load group");
+
+      if (!cancelled) {
+        setType(data.type ?? "");
+        setTitle(data.title ?? "");
+        setDescr(data.description ?? "");
+        setImg(data.image ?? "");
+      }
+    } catch (err) {
+      console.error(err);
+      if (!cancelled) setLoadError(err instanceof Error ? err.message : "Something went wrong");
+    } finally {
+      if (!cancelled) setLoading(false);
+    }
+  }
+
+  loadGroup();
+  return () => {
+    cancelled = true;
+  };
+}, [group_id]);
 
   function handleBack() {
     router.push(onBack);
@@ -81,8 +115,16 @@ export default function GroupHero({
             border: `1px solid ${colors.line}`,
           }}
         >
-          {imageUrl ? (
-            <Image src={imageUrl} alt={groupName} fill style={{ objectFit: "cover" }} />
+          {img ? (
+            <img
+              src={img}
+              alt={title}
+              style={{
+                width: "100%",
+                height: "100%",
+                objectFit: "cover",
+              }}
+            />
           ) : (
             <div
               style={{
@@ -96,7 +138,7 @@ export default function GroupHero({
                 fontSize: "1.5rem",
               }}
             >
-              {groupName.charAt(0).toUpperCase()}
+              {title.charAt(0).toUpperCase()}
             </div>
           )}
         </div>
@@ -114,7 +156,7 @@ export default function GroupHero({
               whiteSpace: "nowrap",
             }}
           >
-            Group: {groupName}
+            {type}: {title}
           </h1>
 
           <div
@@ -161,7 +203,7 @@ export default function GroupHero({
             lineHeight: 1.6,
             }}
         >
-            {description}
+            {descr}
         </p>
         </div>
       </div>

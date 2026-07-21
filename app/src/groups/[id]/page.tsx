@@ -71,13 +71,6 @@ export default function GroupPage() {
   const [itemsError, setItemsError] = useState<Record<string, string | null>>({});
 
   useEffect(() => {
-    document.body.style.backgroundColor = "#EDE6D6";
-    return () => {
-      document.body.style.backgroundColor = "";
-    };
-  }, []);
-
-  useEffect(() => {
     let cancelled = false;
     async function loadUser() {
       try {
@@ -225,10 +218,7 @@ export default function GroupPage() {
 
       <div className="mx-auto max-w-3xl px-6 py-12">
         <GroupHero 
-          groupName = "test" // TO-DO: add dynmaic group name
-          description = "Lorem Epsum" // TO-DO: add description in database
           group_id = {id}
-          imageUrl = "" // TO-DO: add image to database
           onBack = "/src/groups"
         />
 
