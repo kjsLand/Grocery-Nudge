@@ -1,8 +1,10 @@
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { prisma } from '@/lib/prisma'
+import { Prisma } from '@prisma/client'
 import { verifySessionToken } from '@/lib/session'
 import { randomUUID } from 'crypto'
+
 
 // GET /api/groups — list all groups
 export async function GET() {
@@ -41,9 +43,9 @@ export async function POST(request: Request) {
         data: {
           id: groupId,
           title,
-          description,
+          description: description,
           image: img,
-          type,
+          type: type,
           leaderId: payload.userId,
         },
       }),
@@ -61,9 +63,20 @@ export async function POST(request: Request) {
       { status: 201 }
     )
   } catch (err) {
+    if (
+      err instanceof Prisma.PrismaClientKnownRequestError &&
+      err.code === 'P2002'
+    ) {
       return NextResponse.json(
         { error: 'You already have a group with this title' },
         { status: 409 }
       )
     }
+
+    console.error('Failed to create group:', err)
+    return NextResponse.json(
+      { error: 'Something went wrong' },
+      { status: 500 }
+    )
+  }
 }

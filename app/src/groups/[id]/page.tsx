@@ -152,7 +152,7 @@ export default function GroupPage() {
         description = "Lorem Epsum" // TO-DO: add description in database
         group_id = {id}
         imageUrl = "" // TO-DO: add image to database
-        onBack = "src/groups"
+        onBack = "/src/groups"
       />
 
         {!loading && group && (

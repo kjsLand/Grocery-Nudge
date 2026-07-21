@@ -102,7 +102,12 @@ export default function DashboardPage() {
       const res = await fetch("/api/groups", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title }),
+        body: JSON.stringify({ 
+          title,
+          description: "",
+          img: "",
+          type: "GROCERY_LIST"
+        }),
       });
       if (!res.ok) throw new Error("Failed to create group");
       const created: Group = await res.json();
@@ -498,6 +503,8 @@ export default function DashboardPage() {
             {listError}
           </p>
         )}
+
+        <a href="/src/groups-create">Create New Group</a>
 
         {/* List */}
         <div className="groups-list">
