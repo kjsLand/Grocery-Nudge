@@ -38,10 +38,10 @@ type GroceryList = {
 type GroceryItemType = {
   id: string;
   name: string;
-  price?: number;
+  price?: string;
   quantity: number;
-  completed: boolean;
-  assignedTo?: string;
+  isCompleted: boolean;
+  assignedId?: string | null;
 };
 
 export default function GroupPage() {
@@ -199,6 +199,16 @@ export default function GroupPage() {
     }));
   }
 
+  function handleItemUpdated(itemId: string, updates: Partial<GroceryItemType>) {
+    if (!groceryList) return;
+    setItemsByList((s) => ({
+      ...s,
+      [groceryList.id]: (s[groceryList.id] ?? []).map((item) =>
+        item.id === itemId ? { ...item, ...updates } : item
+      ),
+    }));
+  }
+
   const isMember = !!user && members.some((m) => m.id === user.id);
 
   const currentItems = groceryList ? itemsByList[groceryList.id] ?? [] : [];
@@ -253,11 +263,13 @@ export default function GroupPage() {
             key={item.id}
             id={item.id}
             name={item.name}
-            price={item.price?.toString() ?? ""}
+            price={item.price ?? ""}
             quantity={item.quantity.toString()}
-            completed={item.completed}
-            assignedTo={item.assignedTo ?? ""}
+            isCompleted={item.isCompleted}
+            assignedId={item.assignedId ?? null}
+            currentUserId={user?.id}
             onDeleted={handleItemDeleted}
+            onUpdated={handleItemUpdated}
           />
         ))}
 

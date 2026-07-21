@@ -2,14 +2,24 @@ import { useState } from "react";
 import { Trash } from "lucide-react";
 import Button from "./Button";
 
+type GroceryItemUpdate = {
+  name: string;
+  quantity: number;
+  price: string;
+  isCompleted: boolean;
+  assignedId: string | null;
+};
+
 interface GroceryItemProps {
   id: string;
   name: string;
-  completed: boolean;
-  assignedTo?: string | null;
+  isCompleted: boolean;
+  assignedId?: string | null;
   price: string;
   quantity: string;
+  currentUserId?: string;
   onDeleted?: (id: string) => void;
+  onUpdated?: (id: string, updates: Partial<GroceryItemUpdate>) => void;
 }
 
 export default function GroceryItem({
@@ -17,12 +27,16 @@ export default function GroceryItem({
   name,
   price,
   quantity,
-  completed,
-  assignedTo,
+  isCompleted,
+  assignedId,
+  currentUserId,
   onDeleted,
+  onUpdated,
 }: GroceryItemProps) {
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [updating, setUpdating] = useState(false);
+  const [updateError, setUpdateError] = useState<string | null>(null);
 
   async function handleDelete() {
     if (deleting) return;
@@ -43,6 +57,30 @@ export default function GroceryItem({
       setDeleteError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
       setDeleting(false);
+    }
+  }
+
+  async function handleUpdate(updates: Partial<GroceryItemUpdate>) {
+    if (updating || Object.keys(updates).length === 0) return;
+    setUpdating(true);
+    setUpdateError(null);
+
+    try {
+      const res = await fetch(`/api/item/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updates),
+      });
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data?.error || "Failed to update item");
+
+      onUpdated?.(id, updates);
+    } catch (err) {
+      console.error(err);
+      setUpdateError(err instanceof Error ? err.message : "Something went wrong");
+    } finally {
+      setUpdating(false);
     }
   }
 
@@ -128,6 +166,11 @@ export default function GroceryItem({
           color: #8f2e2e;
         }
 
+        .grocery-item__take-btn:disabled {
+          opacity: 0.5;
+          cursor: default;
+        }
+
         .grocery-item__delete-error {
           font-family: var(--font-type);
           font-size: 0.75rem;
@@ -138,14 +181,15 @@ export default function GroceryItem({
 
       <div className="grocery-item__row">
         <button
-          // onClick={onToggleComplete}
-          aria-pressed={completed}
-          aria-label={completed ? "Mark incomplete" : "Mark complete"}
-          className={`grocery-item__checkbox ${completed ? "grocery-item__checkbox--done" : ""}`}
+          onClick={() => handleUpdate({ isCompleted: !isCompleted })}
+          disabled={updating}
+          aria-pressed={isCompleted}
+          aria-label={isCompleted ? "Mark incomplete" : "Mark complete"}
+          className={`grocery-item__checkbox ${isCompleted ? "grocery-item__checkbox--done" : ""}`}
         >
-          {completed && <span className="grocery-item__checkbox-mark">✓</span>}
+          {isCompleted && <span className="grocery-item__checkbox-mark">✓</span>}
         </button>
-        <h1 className={`grocery-item__name ${completed ? "grocery-item__name--done" : ""}`}>
+        <h1 className={`grocery-item__name ${isCompleted ? "grocery-item__name--done" : ""}`}>
           {name}
         </h1>
         <h1 className={`grocery-item__name`}>
@@ -160,21 +204,24 @@ export default function GroceryItem({
       </div>
 
       <p className="grocery-item__assigned">
-        {assignedTo ? (
-          `Assigned to ${assignedTo}`
+        {assignedId ? (
+          `Assigned to ${assignedId}`
         ) : (
           <>
             Unassigned —{" "}
-            <button 
-            // onClick={onTakeOwnership} 
-            className="grocery-item__take-btn">
-              take ownership
-            </button>
           </>
         )}
+        <button
+          onClick={() => currentUserId && handleUpdate({ assignedId: currentUserId })}
+          disabled={updating || !currentUserId}
+          className="grocery-item__take-btn"
+        >
+          - take ownership
+        </button>
       </p>
 
       {deleteError && <p className="grocery-item__delete-error">{deleteError}</p>}
+      {updateError && <p className="grocery-item__delete-error">{updateError}</p>}
     </div>
   );
 }
