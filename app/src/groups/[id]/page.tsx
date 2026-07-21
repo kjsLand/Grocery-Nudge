@@ -10,6 +10,7 @@ import GroupHero from "@/app/src/components/ui/GroupHero"
 import LeaveButton from "../../components/ui/LeaveGroupButton";
 import DeleteButton from "../../components/ui/DeleteGroupButton";
 import GroceryItem from "../../components/ui/GroceryItem";
+import GroceryAdd from "../../components/ui/GroceryAdd";
 
 const handwritten = Kalam({ subsets: ["latin"], weight: ["400", "700"], variable: "--font-hand" });
 const typewriter = Special_Elite({ subsets: ["latin"], weight: "400", variable: "--font-type" });
@@ -163,6 +164,8 @@ export default function GroupPage() {
         completed={false} 
         assignedTo={""}
       />
+
+      <GroceryAdd/>
 
         {!loading && group && (
           <>
