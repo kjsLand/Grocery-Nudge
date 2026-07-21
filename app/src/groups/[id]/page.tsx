@@ -28,7 +28,21 @@ interface Group {
   leaderId: string;
 }
 
-type Member = { id: string; phone: string }
+type Member = { id: string; phone: string };
+
+type GroceryList = {
+  id: string;
+  groupId: string;
+};
+
+type GroceryItemType = {
+  id: string;
+  name: string;
+  price?: number;
+  quantity: number;
+  completed: boolean;
+  assignedTo?: string;
+};
 
 export default function GroupPage() {
   const params = useParams<{ id: string }>();
@@ -44,14 +58,17 @@ export default function GroupPage() {
   const [loadError, setLoadError] = useState<string | null>(null);
 
   // Action state
-  const [actionBusy, setActionBusy] = useState<"join" | "leave" | "delete" | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
 
   const [members, setMembers] = useState<Member[]>([]);
   // Bumped after join/leave to re-trigger the members fetch below
   const [membersVersion, setMembersVersion] = useState(0);
 
-
+  // Grocery list state
+  const [groceryList, setGroceryList] = useState<GroceryList | null>(null);
+  const [itemsByList, setItemsByList] = useState<Record<string, GroceryItemType[]>>({});
+  const [itemsLoading, setItemsLoading] = useState<Record<string, boolean>>({});
+  const [itemsError, setItemsError] = useState<Record<string, string | null>>({});
 
   useEffect(() => {
     document.body.style.backgroundColor = "#EDE6D6";
@@ -105,6 +122,52 @@ export default function GroupPage() {
     };
   }, [id]);
 
+  async function loadItems(listId: string) {
+    setItemsLoading((s) => ({ ...s, [listId]: true }));
+    setItemsError((s) => ({ ...s, [listId]: null }));
+    try {
+      const res = await fetch(`/api/grocery/${listId}/items`);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.error || "Failed to load items");
+      setItemsByList((s) => ({ ...s, [listId]: data }));
+    } catch (err) {
+      console.error(err);
+      setItemsError((s) => ({
+        ...s,
+        [listId]: err instanceof Error ? err.message : "Something went wrong",
+      }));
+    } finally {
+      setItemsLoading((s) => ({ ...s, [listId]: false }));
+    }
+  }
+
+  // Find (or create the reference to) this group's grocery list, then load its items
+  useEffect(() => {
+    if (!id) return;
+    let cancelled = false;
+
+    async function loadGroceryList() {
+      try {
+        const res = await fetch("/api/grocery");
+        const data: GroceryList[] = await res.json();
+        if (!res.ok) return;
+
+        const list = data.find((l) => l.groupId === id);
+        if (!list || cancelled) return;
+
+        setGroceryList(list);
+        loadItems(list.id);
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    loadGroceryList();
+    return () => {
+      cancelled = true;
+    };
+  }, [id]);
+
   useEffect(() => {
     if (!id) return;
 
@@ -137,6 +200,18 @@ export default function GroupPage() {
 
   const isMember = !!user && members.some((m) => m.id === user.id);
 
+  const currentItems = groceryList ? itemsByList[groceryList.id] ?? [] : [];
+  const currentItemsLoading = groceryList ? itemsLoading[groceryList.id] : false;
+  const currentItemsError = groceryList ? itemsError[groceryList.id] : null;
+
+  function handleItemAdded(newItem: GroceryItemType) {
+    if (!groceryList) return;
+    setItemsByList((s) => ({
+      ...s,
+      [groceryList.id]: [...(s[groceryList.id] ?? []), newItem],
+    }));
+  }
+
   return (
     <div
       className={`${handwritten.variable} ${typewriter.variable} ${courierPrime.variable} min-h-screen`}
@@ -148,69 +223,46 @@ export default function GroupPage() {
     >
     <NudgeNavBar />
 
-    <div className="mx-auto max-w-3xl px-6 py-12">
-      <GroupHero 
-        groupName = "test" // TO-DO: add dynmaic group name
-        description = "Lorem Epsum" // TO-DO: add description in database
-        group_id = {id}
-        imageUrl = "" // TO-DO: add image to database
-        onBack = "/src/groups"
-      />
+      <div className="mx-auto max-w-3xl px-6 py-12">
+        <GroupHero 
+          groupName = "test" // TO-DO: add dynmaic group name
+          description = "Lorem Epsum" // TO-DO: add description in database
+          group_id = {id}
+          imageUrl = "" // TO-DO: add image to database
+          onBack = "/src/groups"
+        />
 
-      <GroceryItem 
-        name="Apple" 
-        price="1.00" 
-        quantity="10"
-        completed={false} 
-        assignedTo={""}
-      />
-
-      <GroceryAdd groupId={id}/>
-
-        {!loading && group && (
-          <>
-
-            {actionError && (
-              <p className="mb-4 text-sm text-[#B33A3A]" style={{ fontFamily: "var(--font-type)" }}>
-                {actionError}
-              </p>
-            )}
-
-            {/* Members */}
-            <div
-              className="rounded-sm px-6 py-5 shadow-[3px_4px_0_rgba(43,43,46,0.08)]"
-              style={{ backgroundColor: "#FAF7ED" }}
-            >
-              <p
-                className="mb-3 text-xs uppercase tracking-wide text-[#8A8578]"
-                style={{ fontFamily: "var(--font-type)" }}
-              >
-                Members
-              </p>
-              {members.length === 0 ? (
-                <p className="text-sm text-[#8A8578]" style={{ fontFamily: "var(--font-type)" }}>
-                  No members yet.
-                </p>
-              ) : (
-                <ul className="space-y-1">
-                  {members.map((m) => (
-                    <li key={m.id} className="text-sm text-[#2B2B2E]" style={{ fontFamily: "var(--font-type)" }}>
-                      {m.phone.substring(0, 3) + "-" + m.phone.substring(3, 6) + "-" + m.phone.substring(6, 10)}
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-
-
-            {!loading && group && (
-              <>
-                {/* existing content */}
-                <GroceryListsSection groupId={id} />
-              </>
-            )}
-          </>
+        {currentItemsLoading && (
+          <p className="text-sm text-[#8A8578]" style={{ fontFamily: "var(--font-type)" }}>
+            Loading items...
+          </p>
         )}
+
+        {currentItemsError && (
+          <p className="text-sm text-[#B33A3A]" style={{ fontFamily: "var(--font-type)" }}>
+            {currentItemsError}
+          </p>
+        )}
+
+        {!currentItemsLoading && !currentItemsError && currentItems.length === 0 && groceryList && (
+          <p className="text-sm text-[#8A8578]" style={{ fontFamily: "var(--font-type)" }}>
+            No items yet.
+          </p>
+        )}
+
+        {currentItems.map((item) => (
+          <GroceryItem
+            key={item.id}
+            name={item.name}
+            price={item.price?.toString() ?? ""}
+            quantity={item.quantity.toString()}
+            completed={item.completed}
+            assignedTo={item.assignedTo ?? ""}
+          />
+        ))}
+
+        <GroceryAdd groupId={id} onItemAdded={handleItemAdded} />
+
       </div>
     </div>
   );
