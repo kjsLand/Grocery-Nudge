@@ -56,6 +56,12 @@ export async function POST(request: Request) {
           groupId,
         },
       }),
+      prisma.groceryList.create({
+        data: {
+          id: randomUUID(),
+          groupId
+        }
+      }),
     ])
 
     return NextResponse.json(

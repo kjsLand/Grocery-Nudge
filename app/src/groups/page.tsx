@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Kalam, Special_Elite, Courier_Prime } from "next/font/google";
-import { Plus, Paperclip, Users, ShoppingBasket, LogIn, LogOut, Trash2, ChevronRight } from "lucide-react";
+import { Plus, Paperclip, Users, LogIn, LogOut, Trash2, ChevronRight } from "lucide-react";
 import { NudgeNavBar } from "../components/Nav"
 
 const handwritten = Kalam({ subsets: ["latin"], weight: ["400", "700"], variable: "--font-hand" });
@@ -32,9 +32,6 @@ export default function DashboardPage() {
   // Groups state
   const [groups, setGroups] = useState<Group[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isAdding, setIsAdding] = useState(false);
-  const [newTitle, setNewTitle] = useState("");
-  const [saving, setSaving] = useState(false);
   const [listError, setListError] = useState<string | null>(null);
 
   // Per-group, per-action busy flag so only the row/button clicked shows a spinner state
@@ -93,33 +90,6 @@ export default function DashboardPage() {
       cancelled = true;
     };
   }, []);
-
-  async function handleCreate() {
-    const title = newTitle.trim();
-    if (!title) return;
-    setSaving(true);
-    try {
-      const res = await fetch("/api/groups", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-          title,
-          description: "",
-          img: "",
-          type: "GROCERY_LIST"
-        }),
-      });
-      if (!res.ok) throw new Error("Failed to create group");
-      const created: Group = await res.json();
-      setGroups((prev) => [created, ...prev]);
-      setNewTitle("");
-      setIsAdding(false);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setSaving(false);
-    }
-  }
 
   function openGroup(id: string) {
     router.push(`/src/groups/${id}`);
@@ -224,62 +194,6 @@ export default function DashboardPage() {
           font-family: var(--font-type);
           background: transparent;
           transition: border-color 0.15s, color 0.15s;
-        }
-
-        .groups-header__new-btn:hover {
-          border-color: #B33A3A;
-          color: #B33A3A;
-        }
-
-        .groups-header__form {
-          display: flex;
-          flex-direction: row;
-          flex-wrap: nowrap;
-          align-items: center;
-          gap: 0.5rem;
-          min-width: 0;
-        }
-
-        .groups-header__input {
-          min-width: 0;
-          flex: 1 1 auto;
-          width: 14rem;
-          border: 1px solid rgba(138, 133, 120, 0.4);
-          border-radius: 2px;
-          background: #FAF7ED;
-          padding: 0.375rem 0.75rem;
-          font-size: 1rem;
-          color: #2B2B2E;
-          font-family: var(--font-hand);
-          outline: none;
-        }
-
-        .groups-header__create-btn,
-        .groups-header__cancel-btn {
-          flex-shrink: 0;
-          white-space: nowrap;
-          border-radius: 2px;
-          padding: 0.375rem 0.75rem;
-          font-size: 0.75rem;
-          font-family: var(--font-type);
-        }
-
-        .groups-header__create-btn {
-          background: #B33A3A;
-          color: #FAF7ED;
-        }
-
-        .groups-header__create-btn:disabled {
-          opacity: 0.4;
-        }
-
-        .groups-header__cancel-btn {
-          color: #8A8578;
-          background: transparent;
-        }
-
-        .groups-header__cancel-btn:hover {
-          color: #2B2B2E;
         }
 
         .group-row {
@@ -455,47 +369,10 @@ export default function DashboardPage() {
             {loading ? "loading…" : `${groups.length} group${groups.length === 1 ? "" : "s"} pinned up`}
           </p>
 
-          {!loading && (
-            isAdding ? (
-              <div className="groups-header__form">
-                <input
-                  autoFocus
-                  value={newTitle}
-                  onChange={(e) => setNewTitle(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") handleCreate();
-                    if (e.key === "Escape") {
-                      setIsAdding(false);
-                      setNewTitle("");
-                    }
-                  }}
-                  placeholder="Name this group…"
-                  className="groups-header__input"
-                />
-                <button
-                  onClick={handleCreate}
-                  disabled={saving || !newTitle.trim()}
-                  className="groups-header__create-btn"
-                >
-                  {saving ? "saving…" : "Create"}
-                </button>
-                <button
-                  onClick={() => {
-                    setIsAdding(false);
-                    setNewTitle("");
-                  }}
-                  className="groups-header__cancel-btn"
-                >
-                  Cancel
-                </button>
-              </div>
-            ) : (
-              <button onClick={() => setIsAdding(true)} className="groups-header__new-btn">
-                <Plus className="h-4 w-4" strokeWidth={1.5} />
-                New group
-              </button>
-            )
-          )}
+          <button onClick={() => router.push("/src/groups-create")} className="groups-header__new-btn">
+            <Plus className="h-4 w-4" strokeWidth={1.5} />
+            New group
+          </button>
         </div>
 
         {listError && (
@@ -503,8 +380,6 @@ export default function DashboardPage() {
             {listError}
           </p>
         )}
-
-        <a href="/src/groups-create">Create New Group</a>
 
         {/* List */}
         <div className="groups-list">
