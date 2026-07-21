@@ -1,3 +1,6 @@
+import { Trash } from "lucide-react";
+import Button from "./Button";
+
 interface GroceryItemProps {
   name: string;
   completed: boolean;
@@ -116,6 +119,9 @@ export default function GroceryItem({
         <h1 className={`grocery-item__name`}>
           -- ${price}
         </h1>
+        <Button>
+          <Trash></Trash>
+        </Button>
       </div>
 
       <p className="grocery-item__assigned">
