@@ -16,9 +16,12 @@ model User {
 }
 
 model Group {
-  id          String    @id @default(uuid())
+  id          String   @id @default(uuid())
   title       String
   leaderId    String
+  description String
+  image       String?  // S3 object key or full URL, nullable until uploaded
+  type        String   // "SPLITTER" | "GROCERY_LIST" — consider an enum instead
 
   @@unique([leaderId, title], name: "leaderId_title")
 }

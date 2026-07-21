@@ -24,48 +24,46 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Session expired' }, { status: 401 })
   }
 
-  const { title } = await request.json()
+  const { title, description, img, type } = await request.json()
 
-  if (!title) {
+  if (!title?.trim()) {
     return NextResponse.json({ error: 'Title is required' }, { status: 400 })
   }
-
-  const existing = await prisma.group.findUnique({
-    where: {
-      leaderId_title: {
-        leaderId: payload.userId,
-        title,
-      },
-    },
-  })
-  if (existing) {
-    return NextResponse.json(
-      { error: 'You already have a group with this title' },
-      { status: 409 }
-    )
+  if (type != "SPLITTER" && type != "GROCERY_LIST") {
+    return NextResponse.json({ error: 'Invalid group type' }, { status: 400 })
   }
 
   const groupId = randomUUID()
 
-  const [newGroup] = await prisma.$transaction([
-    prisma.group.create({
-      data: {
-        id: groupId,
-        title,
-        leaderId: payload.userId,
-      },
-    }),
-    prisma.userGroups.create({
-      data: {
-        id: randomUUID(),
-        userId: payload.userId,
-        groupId: groupId,
-      },
-    }),
-  ])
+  try {
+    const [newGroup] = await prisma.$transaction([
+      prisma.group.create({
+        data: {
+          id: groupId,
+          title,
+          description,
+          image: img,
+          type,
+          leaderId: payload.userId,
+        },
+      }),
+      prisma.userGroups.create({
+        data: {
+          id: randomUUID(),
+          userId: payload.userId,
+          groupId,
+        },
+      }),
+    ])
 
-  return NextResponse.json(
-    { ...newGroup, members: [payload.userId] },
-    { status: 201 }
-  )
+    return NextResponse.json(
+      { ...newGroup, members: [payload.userId] },
+      { status: 201 }
+    )
+  } catch (err) {
+      return NextResponse.json(
+        { error: 'You already have a group with this title' },
+        { status: 409 }
+      )
+    }
 }
