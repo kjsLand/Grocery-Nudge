@@ -165,7 +165,7 @@ export default function GroupPage() {
         assignedTo={""}
       />
 
-      <GroceryAdd/>
+      <GroceryAdd groupId={id}/>
 
         {!loading && group && (
           <>
