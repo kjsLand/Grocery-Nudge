@@ -1,23 +1,51 @@
+import { useState } from "react";
 import { Trash } from "lucide-react";
 import Button from "./Button";
 
 interface GroceryItemProps {
+  id: string;
   name: string;
   completed: boolean;
   assignedTo?: string | null;
-  price:string;
-  quantity:string;
-  // onToggleComplete: () => void;
-  // onTakeOwnership?: () => void;
+  price: string;
+  quantity: string;
+  onDeleted?: (id: string) => void;
 }
 
 export default function GroceryItem({
+  id,
   name,
   price,
   quantity,
   completed,
   assignedTo,
+  onDeleted,
 }: GroceryItemProps) {
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+
+  async function handleDelete() {
+    if (deleting) return;
+    setDeleting(true);
+    setDeleteError(null);
+
+    try {
+      const res = await fetch(`/api/item/${id}`, {
+        method: "DELETE",
+      });
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data?.error || "Failed to delete item");
+
+      onDeleted?.(id);
+    } catch (err) {
+      console.error(err);
+      setDeleteError(err instanceof Error ? err.message : "Something went wrong");
+    } finally {
+      setDeleting(false);
+    }
+  }
+
   return (
     <div className="grocery-item">
       <style>{`
@@ -99,6 +127,13 @@ export default function GroceryItem({
         .grocery-item__take-btn:hover {
           color: #8f2e2e;
         }
+
+        .grocery-item__delete-error {
+          font-family: var(--font-type);
+          font-size: 0.75rem;
+          color: #B33A3A;
+          padding-left: 2rem;
+        }
       `}</style>
 
       <div className="grocery-item__row">
@@ -119,8 +154,8 @@ export default function GroceryItem({
         <h1 className={`grocery-item__name`}>
           -- ${price}
         </h1>
-        <Button>
-          <Trash></Trash>
+        <Button onClick={handleDelete} disabled={deleting} aria-label="Delete item">
+          <Trash />
         </Button>
       </div>
 
@@ -138,6 +173,8 @@ export default function GroceryItem({
           </>
         )}
       </p>
+
+      {deleteError && <p className="grocery-item__delete-error">{deleteError}</p>}
     </div>
   );
 }

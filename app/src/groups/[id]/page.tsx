@@ -191,6 +191,14 @@ export default function GroupPage() {
     // membersVersion is a manual trigger — bumped after join/leave so this refetches
   }, [id, membersVersion]);
 
+  function handleItemDeleted(itemId: string) {
+    if (!groceryList) return;
+    setItemsByList((s) => ({
+      ...s,
+      [groceryList.id]: (s[groceryList.id] ?? []).filter((i) => i.id !== itemId),
+    }));
+  }
+
   const isMember = !!user && members.some((m) => m.id === user.id);
 
   const currentItems = groceryList ? itemsByList[groceryList.id] ?? [] : [];
@@ -243,11 +251,13 @@ export default function GroupPage() {
         {currentItems.map((item) => (
           <GroceryItem
             key={item.id}
+            id={item.id}
             name={item.name}
             price={item.price?.toString() ?? ""}
             quantity={item.quantity.toString()}
             completed={item.completed}
             assignedTo={item.assignedTo ?? ""}
+            onDeleted={handleItemDeleted}
           />
         ))}
 
