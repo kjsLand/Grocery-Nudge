@@ -18,7 +18,7 @@ export default function RegisterPage() {
     setIsSubmitting(true)
 
     const formData = new FormData(event.currentTarget)
-    const email = formData.get('email')
+    const username = formData.get('username')
     const phone = formData.get('phone')
     const password = formData.get('password')
 
@@ -26,7 +26,7 @@ export default function RegisterPage() {
       const response = await fetch('/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, phone, password }),
+        body: JSON.stringify({ username, phone, password }),
       })
 
       if (response.ok) {
@@ -55,7 +55,7 @@ export default function RegisterPage() {
         title="Create an Account!" 
       >
         <form onSubmit={handleSubmit} className="form" noValidate>
-          <TextField label="Email" name="email" type="email" required autoComplete="email" />
+          <TextField label="username" name="username" type="username" required autoComplete="username" />
           <TextField label="Phone Number" name="phone" type="tel" required autoComplete="tel" placeholder="(555) 555-5555"/>
           <TextField
             label="Password"

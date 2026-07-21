@@ -18,14 +18,14 @@ export default function LoginPage() {
     setIsSubmitting(true)
 
     const formData = new FormData(event.currentTarget)
-    const email = formData.get('email')
+    const username = formData.get('username')
     const password = formData.get('password')
 
     try {
       const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ username, password }),
       })
 
       if (response.ok) {
@@ -52,7 +52,7 @@ export default function LoginPage() {
 
       <Panel eyebrow="— First on the list, enter your info —" title="Sign in">
         <form onSubmit={handleSubmit} className="form" noValidate>
-          <TextField label="Email" name="email" type="email" required autoComplete="email" />
+          <TextField label="Username" name="username" type="username" required autoComplete="username" />
           <TextField
             label="Password"
             name="password"

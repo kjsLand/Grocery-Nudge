@@ -5,10 +5,10 @@ import { createSessionToken } from '@/lib/session'
 import { randomUUID } from 'crypto'
 
 export async function POST(request: Request) {
-  const { email, password, phone } = await request.json()
+  const { username, password, phone } = await request.json()
 
-  if (!email || !password) {
-    return NextResponse.json({ error: 'Email and password are required' }, { status: 400 })
+  if (!username || !password) {
+    return NextResponse.json({ error: 'username and password are required' }, { status: 400 })
   }
 
   if (password.length < 8) {
@@ -16,16 +16,16 @@ export async function POST(request: Request) {
   }
 
   const existing = await prisma.user.findUnique({
-    where: { email: email.toLowerCase() },
+    where: { username: username.toLowerCase() },
   })
   if (existing) {
-    return NextResponse.json({ error: 'An account with this email already exists' }, { status: 409 })
+    return NextResponse.json({ error: 'An account with this username already exists' }, { status: 409 })
   }
 
   const newUser = await prisma.user.create({
     data: {
       id: randomUUID(),
-      email: email.toLowerCase(),
+      username: username.toLowerCase(),
       passwordHash: hashPassword(password),
       phone: phone,
       createdAt: new Date().toISOString(),
@@ -34,7 +34,7 @@ export async function POST(request: Request) {
 
   // Log the user in immediately after registering
   const token = createSessionToken(newUser.id)
-  const response = NextResponse.json({ id: newUser.id, email: newUser.email }, { status: 201 })
+  const response = NextResponse.json({ id: newUser.id, username: newUser.username }, { status: 201 })
 
   response.cookies.set('session', token, {
     httpOnly: true,
