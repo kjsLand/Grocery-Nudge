@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft, Users } from "lucide-react";
 import { colors, fonts, spacing, radii } from "@/app/src/theme/tokens";
 import { Members } from "./Members";
+import LeaveButton from "./LeaveGroupButton";
+import DeleteButton from "./DeleteGroupButton";
 
 interface GroupHeroProps {
   groupName: string;
@@ -117,18 +119,36 @@ export default function GroupHero({
 
           <div
             style={{
-              display: "inline-flex",
+              display: "flex",
               alignItems: "center",
+              justifyContent: "space-between",
               gap: spacing.xs,
               marginTop: spacing.xs,
+              width: "100%",
               color: colors.amber,
               fontFamily: fonts.body,
               fontSize: "0.8rem",
             }}
-            >
-
-            
+          >
             <Members id={group_id} />
+
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: spacing.xs,
+              }}
+            >
+              <LeaveButton
+                group_id={group_id}
+                onBack="/src/groups"
+              />
+
+              <DeleteButton
+                group_id={group_id}
+                onBack="/src/groups"
+              />
+            </div>
           </div>
         </div>
       </div>

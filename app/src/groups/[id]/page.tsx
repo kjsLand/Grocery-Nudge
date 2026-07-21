@@ -7,6 +7,8 @@ import { Users, LogIn, LogOut, Trash2, ArrowLeft } from "lucide-react";
 import { NudgeNavBar } from "../../components/Nav"
 import { GroceryListsSection } from "../../grocery_section/page";
 import GroupHero from "@/app/src/components/ui/GroupHero"
+import LeaveButton from "../../components/ui/LeaveGroupButton";
+import DeleteButton from "../../components/ui/DeleteGroupButton";
 
 const handwritten = Kalam({ subsets: ["latin"], weight: ["400", "700"], variable: "--font-hand" });
 const typewriter = Special_Elite({ subsets: ["latin"], weight: "400", variable: "--font-type" });
@@ -215,39 +217,7 @@ export default function GroupPage() {
                 {actionError}
               </p>
             )}
-
-            {/* Actions */}
-            <div className="mb-8 flex flex-wrap gap-2" style={{ fontFamily: "var(--font-type)" }}>
-              {isMember ? (
-                <button
-                  onClick={handleLeave}
-                  disabled={actionBusy === "leave"}
-                  className="flex items-center gap-1.5 rounded-sm border border-[#8A8578]/50 px-3 py-1.5 text-sm text-[#2B2B2E] hover:bg-[#8A8578]/10 disabled:opacity-40"
-                >
-                  <LogOut className="h-3.5 w-3.5" />
-                  {actionBusy === "leave" ? "leaving…" : "Leave"}
-                </button>
-              ) : (
-                <button
-                  onClick={handleJoin}
-                  disabled={actionBusy === "join"}
-                  className="flex items-center gap-1.5 rounded-sm bg-[#2B2B2E] px-3 py-1.5 text-sm text-[#FAF7ED] hover:bg-[#2B2B2E]/90 disabled:opacity-40"
-                >
-                  <LogIn className="h-3.5 w-3.5" />
-                  {actionBusy === "join" ? "joining…" : "Join"}
-                </button>
-              )}
-
-              <button
-                onClick={handleDeleteGroup}
-                disabled={actionBusy === "delete"}
-                className="ml-auto flex items-center gap-1.5 rounded-sm px-3 py-1.5 text-sm text-[#B33A3A] hover:bg-[#B33A3A]/10 disabled:opacity-40"
-              >
-                <Trash2 className="h-3.5 w-3.5" />
-                {actionBusy === "delete" ? "deleting…" : "Delete group"}
-              </button>
-            </div>
-
+            
             {/* Members */}
             <div
               className="rounded-sm px-6 py-5 shadow-[3px_4px_0_rgba(43,43,46,0.08)]"
