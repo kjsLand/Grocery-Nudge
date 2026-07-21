@@ -21,7 +21,7 @@ export const colors = {
   panel: "#1E252B", // card/surface background
 
   // Text
-  paper: "#F4EFE6", // primary text on dark surfaces
+  paper: "#EDE6D6", // primary text on dark surfaces
   slate: "#7C8894", // secondary/muted text, labels at rest
   mutedPlaceholder: "#56626C", // input placeholder text
 
