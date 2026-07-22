@@ -186,7 +186,7 @@ export default function Invites() {
   const inputStyle: React.CSSProperties = {
     fontFamily: fonts.body,
     fontSize: "0.95rem",
-    color: colors.paper,
+    color: colors.amber,
     background: "transparent",
     border: "none",
     borderBottom: `1px solid ${colors.line}`,
