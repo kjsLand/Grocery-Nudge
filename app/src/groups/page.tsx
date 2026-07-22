@@ -127,6 +127,10 @@ export default function DashboardPage() {
     router.push(`/src/groups/${id}`);
   }
 
+  function handleGroupDeleted(groupId: string) {
+    setGroups((prev) => prev.filter((g) => g.id !== groupId));
+  }
+
   return (
     <div
       className={`${handwritten.variable} ${typewriter.variable} ${courierPrime.variable} min-h-screen`}
@@ -305,7 +309,7 @@ export default function DashboardPage() {
                         name={group.title}
                         clickPath={() => openGroup(group.id)}
                       />
-                      <DeleteButton group_id={group.id} onBack=""></DeleteButton>
+                      <DeleteButton group_id={group.id} onDeleted={() => handleGroupDeleted(group.id)} />
                     </div>
                   ))}
 
