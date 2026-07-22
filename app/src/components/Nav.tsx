@@ -1,15 +1,13 @@
 "use client";
 
-import React, { useState } from "react";
-import { colors } from "../theme/tokens";
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Users, Mail, ScanLine, LogOut, Settings } from "lucide-react";
+import { Users, Mail, LogOut, Settings } from "lucide-react";
 
 const PAGES = [
   { id: "groups", label: "Groups", href: "/src/groups", icon: Users },
   { id: "invites", label: "Invites", href: "/src/invites", icon: Mail },
-  { id: "resteraunt", label: "Resteraunt Splitter", href: "/src/splitter", icon: ScanLine },
   { id: "settings", label: "Settings", href: "/src/settings", icon: Settings },
 ];
 
