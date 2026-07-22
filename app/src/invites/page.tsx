@@ -2,26 +2,9 @@
 'use client'
 
 import { useEffect, useState, type FormEvent } from 'react'
-import { Caveat, Source_Serif_4, Courier_Prime } from 'next/font/google'
+import { useRouter } from "next/navigation"
 import { NudgeNavBar } from "../components/Nav"
-import { useRouter } from "next/navigation";
-
-
-const caveat = Caveat({
-  subsets: ['latin'],
-  weight: ['500', '700'],
-  variable: '--font-caveat',
-})
-const sourceSerif = Source_Serif_4({
-  subsets: ['latin'],
-  weight: ['400', '600'],
-  variable: '--font-serif',
-})
-const courierPrime = Courier_Prime({
-  subsets: ['latin'],
-  weight: ['400', '700'],
-  variable: '--font-mono',
-})
+import { colors, fonts, spacing, radii } from "@/app/src/theme/tokens"
 
 // Matches the Invite model: groupId / senderId / receiverId, status is a
 // plain string in the schema (not an enum), createdAt is stored as a string.
@@ -41,13 +24,18 @@ type Group = {
 }
 
 type UserAccount = {
-  id: string;
-  email: string;
-  createdAt: string;
-};
+  id: string
+  email: string
+  createdAt: string
+}
+
+const STATUS_COLOR: Record<string, string> = {
+  accepted: colors.amber,
+  pending: colors.slate,
+}
 
 export default function Invites() {
-  const router = useRouter();
+  const router = useRouter()
 
   const [invites, setInvites] = useState<Invite[]>([])
   const [groups, setGroups] = useState<Group[]>([])
@@ -59,8 +47,8 @@ export default function Invites() {
   const [isLoadingGroups, setIsLoadingGroups] = useState(true)
   const [pendingActionId, setPendingActionId] = useState<string | null>(null)
 
-  const [user, setUser] = useState<UserAccount | null>(null);
-  const [profileStatus, setProfileStatus] = useState<"loading" | "ready" | "error">("loading");
+  const [, setUser] = useState<UserAccount | null>(null)
+  const [, setProfileStatus] = useState<"loading" | "ready" | "error">("loading")
 
   // groupId -> title, so the list can show a name instead of a raw id
   const groupNameById = new Map(groups.map(g => [g.id, g.title]))
@@ -101,28 +89,28 @@ export default function Invites() {
   }, [])
 
   useEffect(() => {
-    let cancelled = false;
+    let cancelled = false
     async function loadUser() {
       try {
-        const response = await fetch("/api/auth/me");
+        const response = await fetch("/api/auth/me")
         if (!response.ok) {
-          if (!cancelled) router.push("/src/login");
-          return;
+          if (!cancelled) router.push("/src/login")
+          return
         }
-        const data = await response.json();
+        const data = await response.json()
         if (!cancelled) {
-          setUser(data);
-          setProfileStatus("ready");
+          setUser(data)
+          setProfileStatus("ready")
         }
       } catch {
-        if (!cancelled) setProfileStatus("error");
+        if (!cancelled) setProfileStatus("error")
       }
     }
-    loadUser();
+    loadUser()
     return () => {
-      cancelled = true;
-    };
-  }, [router]);
+      cancelled = true
+    }
+  }, [router])
 
   async function handleSend(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -186,414 +174,275 @@ export default function Invites() {
     }
   }
 
+  const labelStyle: React.CSSProperties = {
+    margin: 0,
+    fontFamily: fonts.body,
+    fontSize: "0.75rem",
+    letterSpacing: "0.08em",
+    textTransform: "uppercase",
+    color: colors.amber,
+  }
+
+  const inputStyle: React.CSSProperties = {
+    fontFamily: fonts.body,
+    fontSize: "0.95rem",
+    color: colors.paper,
+    background: "transparent",
+    border: "none",
+    borderBottom: `1px solid ${colors.line}`,
+    borderRadius: 0,
+    padding: `${spacing.sm} 2px`,
+    outline: "none",
+  }
+
   return (
-    <div className={`${caveat.variable} ${sourceSerif.variable} ${courierPrime.variable} shell`}>
+    <div style={{ minHeight: "100vh", backgroundColor: colors.paper }}>
       <NudgeNavBar />
 
-      <main className="wrap">
-        <div className="margin-rule" />
-        <div className="content">
-          <header className="page-head">
-            <p className="eyebrow">— private notebook —</p>
-            <h1 className="title">Invites</h1>
-          </header>
+      <div style={{ maxWidth: "720px", margin: "0 auto", padding: `${spacing.xxl} ${spacing.lg}` }}>
+        <p
+          style={{
+            margin: 0,
+            marginBottom: spacing.xs,
+            fontFamily: fonts.body,
+            fontSize: "0.75rem",
+            letterSpacing: "0.12em",
+            textTransform: "uppercase",
+            color: colors.amber,
+          }}
+        >
+          Groups
+        </p>
+        <h1
+          style={{
+            margin: 0,
+            marginBottom: spacing.xl,
+            fontFamily: fonts.display,
+            fontSize: "2.25rem",
+            color: colors.mutedPlaceholder,
+          }}
+        >
+          Invites
+        </h1>
 
-          <div className="layout">
-            <section className="panel send-panel">
-              <p className="eyebrow">— send one —</p>
-              <form onSubmit={handleSend} className="form" noValidate>
-                <label className="field">
-                  <span className="label">Group</span>
-                  {isLoadingGroups ? (
-                    <span className="empty">loading groups…</span>
-                  ) : groups.length === 0 ? (
-                    <span className="empty">no groups yet — make one first</span>
-                  ) : (
-                    <select
-                      name="group_id"
-                      required
-                      value={groupId}
-                      onChange={e => setGroupId(e.target.value)}
-                    >
-                      {groups.map(group => (
-                        <option key={group.id} value={group.id}>
-                          {group.title}
-                        </option>
-                      ))}
-                    </select>
-                  )}
-                </label>
+        <div style={{ display: "grid", gridTemplateColumns: "minmax(240px, 320px) 1fr", gap: spacing.xxl }}>
+          {/* Send panel */}
+          <div
+            style={{
+              backgroundColor: colors.paper,
+              border: `1px solid ${colors.line}`,
+              borderRadius: radii.lg,
+              padding: spacing.xl,
+              height: "fit-content",
+            }}
+          >
+            <p style={{ ...labelStyle, marginBottom: spacing.lg }}>Send one</p>
 
-                <label className="field">
-                  <span className="label">Phone Number</span>
-                  <input
-                    name="number"
-                    type="tel"
+            <form onSubmit={handleSend} noValidate style={{ display: "flex", flexDirection: "column", gap: spacing.lg }}>
+              <label style={{ display: "flex", flexDirection: "column", gap: spacing.xs }}>
+                <span style={labelStyle}>Group</span>
+                {isLoadingGroups ? (
+                  <span style={{ fontFamily: fonts.body, fontSize: "0.85rem", color: colors.mutedPlaceholder }}>
+                    loading groups…
+                  </span>
+                ) : groups.length === 0 ? (
+                  <span style={{ fontFamily: fonts.body, fontSize: "0.85rem", color: colors.mutedPlaceholder }}>
+                    no groups yet — make one first
+                  </span>
+                ) : (
+                  <select
+                    name="group_id"
                     required
-                    value={number}
-                    onChange={e => setNumber(e.target.value)}
-                    placeholder="(555) 555-5555"
-                  />
-                </label>
+                    value={groupId}
+                    onChange={e => setGroupId(e.target.value)}
+                    style={{ ...inputStyle, cursor: "pointer" }}
+                  >
+                    {groups.map(group => (
+                      <option key={group.id} value={group.id}>
+                        {group.title}
+                      </option>
+                    ))}
+                  </select>
+                )}
+              </label>
 
-                {error && <p className="error">{error}</p>}
+              <label style={{ display: "flex", flexDirection: "column", gap: spacing.xs }}>
+                <span style={labelStyle}>Phone Number</span>
+                <input
+                  name="number"
+                  type="tel"
+                  required
+                  value={number}
+                  onChange={e => setNumber(e.target.value)}
+                  placeholder="(555) 555-5555"
+                  style={inputStyle}
+                />
+              </label>
 
-                <button type="submit" className="stamp" disabled={isSending || groups.length === 0}>
-                  {isSending ? 'sending…' : 'Send invite'}
-                </button>
-              </form>
-            </section>
-
-            <section className="panel list-panel">
-              <p className="eyebrow">— on the list —</p>
-
-              {isLoading && <p className="empty">fetching invites…</p>}
-
-              {!isLoading && invites.length === 0 && (
-                <p className="empty">no invites yet — send one on the left</p>
+              {error && (
+                <p style={{ margin: 0, fontFamily: fonts.body, fontSize: "0.8rem", color: colors.error }}>
+                  {error}
+                </p>
               )}
 
-              {!isLoading && invites.length > 0 && (
-                <ul className="list">
-                  {invites.map(invite => (
-                    <li key={invite.id} className="item">
-                      <div className="item-info">
-                        {/* The Invite model only stores receiverId, not a phone
-                            number. Showing the id for now — if /api/invites
-                            starts returning the receiver's phone/email (e.g.
-                            via a Prisma `include`), swap this for that. */}
-                        <span className="item-number">invited: {invite.receiverId}</span>
-                        <span className={`item-status status-${invite.status}`}>
-                          {invite.status}
-                        </span>
-                        <span className="item-group">group: {groupName(invite.groupId)}</span>
-                      </div>
-                      <div className="item-actions">
-                        {invite.status !== 'accepted' && (
-                          <button
-                            type="button"
-                            className="link-btn accept"
-                            disabled={pendingActionId === invite.id}
-                            onClick={() => handleAccept(invite)}
-                          >
-                            accept
-                          </button>
-                        )}
+              <button
+                type="submit"
+                disabled={isSending || groups.length === 0}
+                style={{
+                  alignSelf: "flex-start",
+                  fontFamily: fonts.body,
+                  fontSize: "0.75rem",
+                  fontWeight: 700,
+                  letterSpacing: "0.08em",
+                  textTransform: "uppercase",
+                  color: colors.amber,
+                  background: "transparent",
+                  border: `1px solid ${colors.amber}`,
+                  borderRadius: radii.md,
+                  padding: `${spacing.sm} ${spacing.lg}`,
+                  cursor: isSending || groups.length === 0 ? "not-allowed" : "pointer",
+                  opacity: isSending || groups.length === 0 ? 0.5 : 1,
+                }}
+              >
+                {isSending ? 'Sending…' : 'Send invite'}
+              </button>
+            </form>
+          </div>
+
+          {/* List panel */}
+          <div
+            style={{
+              backgroundColor: colors.paper,
+              border: `1px solid ${colors.line}`,
+              borderRadius: radii.lg,
+              overflow: "hidden",
+            }}
+          >
+            {isLoading && (
+              <div style={{ padding: spacing.xl }}>
+                {[0, 1, 2].map(i => (
+                  <div
+                    key={i}
+                    style={{
+                      height: "1rem",
+                      width: i % 2 === 0 ? "60%" : "40%",
+                      backgroundColor: colors.line,
+                      borderRadius: radii.sm,
+                      marginBottom: i === 2 ? 0 : spacing.lg,
+                      opacity: 0.6,
+                    }}
+                  />
+                ))}
+              </div>
+            )}
+
+            {!isLoading && invites.length === 0 && (
+              <p
+                style={{
+                  margin: 0,
+                  padding: spacing.xl,
+                  fontFamily: fonts.body,
+                  fontSize: "0.875rem",
+                  fontStyle: "italic",
+                  color: colors.mutedPlaceholder,
+                }}
+              >
+                No invites yet — send one on the left.
+              </p>
+            )}
+
+            {!isLoading && invites.length > 0 && (
+              <ul style={{ listStyle: "none", margin: 0, padding: 0 }}>
+                {invites.map((invite, i) => (
+                  <li
+                    key={invite.id}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      gap: spacing.md,
+                      padding: `${spacing.md} ${spacing.xl}`,
+                      borderBottom: i === invites.length - 1 ? "none" : `1px solid ${colors.line}`,
+                    }}
+                  >
+                    <div style={{ display: "flex", flexDirection: "column", gap: spacing.xs }}>
+                      {/* The Invite model only stores receiverId, not a phone
+                          number. Showing the id for now — if /api/invites
+                          starts returning the receiver's phone/email (e.g.
+                          via a Prisma `include`), swap this for that. */}
+                      <span style={{ fontFamily: fonts.body, fontSize: "0.9rem", color: colors.paper }}>
+                        invited: {invite.receiverId}
+                      </span>
+                      <span
+                        style={{
+                          fontFamily: fonts.body,
+                          fontSize: "0.7rem",
+                          letterSpacing: "0.06em",
+                          textTransform: "uppercase",
+                          color: STATUS_COLOR[invite.status] ?? colors.slate,
+                          width: "fit-content",
+                        }}
+                      >
+                        {invite.status}
+                      </span>
+                      <span style={{ fontFamily: fonts.body, fontSize: "0.75rem", color: colors.mutedPlaceholder }}>
+                        group: {groupName(invite.groupId)}
+                      </span>
+                    </div>
+
+                    <div style={{ display: "flex", gap: spacing.md, flexShrink: 0 }}>
+                      {invite.status !== 'accepted' && (
                         <button
                           type="button"
-                          className="link-btn delete"
                           disabled={pendingActionId === invite.id}
-                          onClick={() => handleDelete(invite.id)}
+                          onClick={() => handleAccept(invite)}
+                          style={{
+                            fontFamily: fonts.body,
+                            fontSize: "0.7rem",
+                            letterSpacing: "0.06em",
+                            textTransform: "uppercase",
+                            background: "none",
+                            border: "none",
+                            color: colors.amber,
+                            cursor: pendingActionId === invite.id ? "not-allowed" : "pointer",
+                            opacity: pendingActionId === invite.id ? 0.4 : 1,
+                            padding: 0,
+                            textDecoration: "underline",
+                            textUnderlineOffset: "3px",
+                          }}
                         >
-                          delete
+                          accept
                         </button>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </section>
+                      )}
+                      <button
+                        type="button"
+                        disabled={pendingActionId === invite.id}
+                        onClick={() => handleDelete(invite.id)}
+                        style={{
+                          fontFamily: fonts.body,
+                          fontSize: "0.7rem",
+                          letterSpacing: "0.06em",
+                          textTransform: "uppercase",
+                          background: "none",
+                          border: "none",
+                          color: colors.error,
+                          cursor: pendingActionId === invite.id ? "not-allowed" : "pointer",
+                          opacity: pendingActionId === invite.id ? 0.4 : 1,
+                          padding: 0,
+                          textDecoration: "underline",
+                          textUnderlineOffset: "3px",
+                        }}
+                      >
+                        delete
+                      </button>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
         </div>
-      </main>
-
-      <style jsx>{`
-        .shell {
-          --paper: #ede6d3;
-          --paper-shadow: #dcd3b8;
-          --ink: #22283b;
-          --graphite: #6b6458;
-          --wax-red: #b33a3a;
-          --wax-green: #4c7a52;
-          --rule-blue: #a9bbd1;
-
-          min-height: 100vh;
-          display: flex;
-          flex-direction: column;
-          background: var(--paper-shadow);
-        }
-
-        .wrap {
-          position: relative;
-          flex: 1 1 auto;
-          width: 100%;
-          background: var(--paper);
-          background-image: radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.2), transparent 60%);
-        }
-
-        .margin-rule {
-          position: absolute;
-          top: 0;
-          bottom: 0;
-          left: 56px;
-          width: 1px;
-          background: var(--wax-red);
-          opacity: 0.55;
-        }
-
-        .content {
-          width: 100%;
-          max-width: 1200px;
-          margin: 0 auto;
-          padding: 48px 40px 64px 80px;
-          background-image: repeating-linear-gradient(
-            to bottom,
-            transparent,
-            transparent 35px,
-            var(--rule-blue) 36px
-          );
-          background-position: 0 116px;
-        }
-
-        .page-head {
-          margin-bottom: 32px;
-        }
-
-        .eyebrow {
-          font-family: var(--font-mono);
-          font-size: 11px;
-          letter-spacing: 0.12em;
-          text-transform: uppercase;
-          color: var(--graphite);
-          margin: 0 0 4px;
-        }
-
-        .title {
-          font-family: var(--font-caveat);
-          font-weight: 700;
-          font-size: 56px;
-          line-height: 1;
-          color: var(--ink);
-          margin: 0;
-          transform: rotate(-1deg);
-        }
-
-        .layout {
-          display: grid;
-          grid-template-columns: minmax(260px, 340px) 1fr;
-          gap: 56px;
-          align-items: start;
-        }
-
-        .panel {
-          min-width: 0;
-        }
-
-        .send-panel {
-          position: sticky;
-          top: 24px;
-        }
-
-        .form {
-          display: flex;
-          flex-direction: column;
-          gap: 24px;
-          margin-top: 16px;
-        }
-
-        .field {
-          display: flex;
-          flex-direction: column;
-          gap: 6px;
-        }
-
-        .label {
-          font-family: var(--font-mono);
-          font-size: 12px;
-          letter-spacing: 0.06em;
-          text-transform: uppercase;
-          color: var(--graphite);
-        }
-
-        .field input,
-        .field select {
-          font-family: var(--font-serif);
-          font-size: 17px;
-          color: var(--ink);
-          background: transparent;
-          border: none;
-          border-bottom: 1px solid rgba(34, 40, 59, 0.35);
-          padding: 4px 2px 8px;
-          outline: none;
-        }
-
-        .field select {
-          appearance: none;
-          -webkit-appearance: none;
-          border-radius: 0;
-          cursor: pointer;
-        }
-
-        .field input::placeholder {
-          color: rgba(34, 40, 59, 0.35);
-        }
-
-        .field input:focus,
-        .field select:focus {
-          border-bottom: 1px solid var(--wax-red);
-        }
-
-        .field input:focus-visible,
-        .field select:focus-visible {
-          outline: 2px solid var(--wax-red);
-          outline-offset: 3px;
-        }
-
-        .error {
-          font-family: var(--font-caveat);
-          font-size: 19px;
-          color: var(--wax-red);
-          margin: -8px 0 0;
-        }
-
-        .stamp {
-          align-self: flex-start;
-          margin-top: 4px;
-          font-family: var(--font-mono);
-          font-size: 13px;
-          font-weight: 700;
-          letter-spacing: 0.1em;
-          text-transform: uppercase;
-          color: var(--wax-red);
-          background: transparent;
-          border: 3px double var(--wax-red);
-          border-radius: 44% 42% 40% 45% / 50% 45% 50% 45%;
-          padding: 10px 26px;
-          cursor: pointer;
-          transform: rotate(-3deg);
-          transition: background 0.15s ease, color 0.15s ease;
-        }
-
-        .stamp:hover:not(:disabled) {
-          background: var(--wax-red);
-          color: var(--paper);
-        }
-
-        .stamp:disabled {
-          opacity: 0.5;
-          cursor: not-allowed;
-        }
-
-        .empty {
-          font-family: var(--font-serif);
-          font-style: italic;
-          font-size: 14px;
-          color: var(--graphite);
-          margin: 16px 0 0;
-        }
-
-        .list {
-          list-style: none;
-          margin: 16px 0 0;
-          padding: 0;
-          display: flex;
-          flex-direction: column;
-          gap: 14px;
-        }
-
-        .item {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 12px;
-          padding-bottom: 10px;
-          border-bottom: 1px dashed rgba(34, 40, 59, 0.25);
-        }
-
-        .item-info {
-          display: flex;
-          flex-direction: column;
-          gap: 2px;
-        }
-
-        .item-number {
-          font-family: var(--font-serif);
-          font-size: 16px;
-          color: var(--ink);
-        }
-
-        .item-status {
-          font-family: var(--font-mono);
-          font-size: 10px;
-          letter-spacing: 0.08em;
-          text-transform: uppercase;
-          width: fit-content;
-        }
-
-        .status-pending {
-          color: var(--graphite);
-        }
-
-        .status-accepted {
-          color: var(--wax-green);
-        }
-
-        .item-group {
-          font-family: var(--font-mono);
-          font-size: 11px;
-          color: var(--graphite);
-        }
-
-        .item-actions {
-          display: flex;
-          gap: 14px;
-          flex-shrink: 0;
-        }
-
-        .link-btn {
-          font-family: var(--font-mono);
-          font-size: 11px;
-          letter-spacing: 0.06em;
-          text-transform: uppercase;
-          background: none;
-          border: none;
-          cursor: pointer;
-          padding: 0;
-          text-decoration: underline;
-          text-decoration-style: wavy;
-          text-underline-offset: 3px;
-        }
-
-        .link-btn:disabled {
-          opacity: 0.4;
-          cursor: not-allowed;
-        }
-
-        .link-btn.accept {
-          color: var(--wax-green);
-        }
-
-        .link-btn.delete {
-          color: var(--wax-red);
-        }
-
-        @media (max-width: 780px) {
-          .layout {
-            grid-template-columns: 1fr;
-            gap: 36px;
-          }
-          .send-panel {
-            position: static;
-          }
-        }
-
-        @media (max-width: 480px) {
-          .content {
-            padding: 36px 20px 48px 44px;
-          }
-          .margin-rule {
-            left: 24px;
-          }
-          .title {
-            font-size: 42px;
-          }
-          .item {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 6px;
-          }
-        }
-      `}</style>
+      </div>
     </div>
   )
 }
