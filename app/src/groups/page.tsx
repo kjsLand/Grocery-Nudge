@@ -3,9 +3,9 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Kalam, Special_Elite, Courier_Prime } from "next/font/google";
-import { Plus, Paperclip, Users, LogIn, LogOut, Trash2, ChevronRight } from "lucide-react";
 import { NudgeNavBar } from "../components/Nav"
 import GroupPreview from "../components/ui/GroupPreview";
+import DeleteButton from "../components/ui/DeleteGroupButton";
 
 const handwritten = Kalam({ subsets: ["latin"], weight: ["400", "700"], variable: "--font-hand" });
 const typewriter = Special_Elite({ subsets: ["latin"], weight: "400", variable: "--font-type" });
@@ -21,6 +21,40 @@ interface Group {
   id: string;
   title: string;
   members: string[];
+  imageUrl?: string;
+  type: string;
+}
+
+// Kraft-paper-ish palette so generated avatars stay on-theme instead of
+// clashing with the notebook background.
+const AVATAR_COLORS = ["#C9825A", "#7C9070", "#7A8CA3", "#B58A5C", "#A16B6B", "#8A8578"];
+
+function hashString(value: string): number {
+  let hash = 0;
+  for (let i = 0; i < value.length; i++) {
+    hash = (hash << 5) - hash + value.charCodeAt(i);
+    hash |= 0;
+  }
+  return Math.abs(hash);
+}
+
+// Groups don't always have a photo, so fall back to a hand-lettered
+// initial on a paper-toned circle rather than showing the same stock
+// image for every card.
+function getGroupImage(group: Group): string {
+  if (group.imageUrl) return group.imageUrl;
+
+  const initial = group.title.trim().charAt(0).toUpperCase() || "?";
+  const color = AVATAR_COLORS[hashString(group.id) % AVATAR_COLORS.length];
+  const svg = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="200" height="200">
+      <rect width="200" height="200" fill="${color}" />
+      <text x="50%" y="54%" font-family="Georgia, serif" font-size="90"
+        fill="#FAF7ED" text-anchor="middle" dominant-baseline="middle">${initial}</text>
+    </svg>
+  `.trim();
+
+  return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
 }
 
 export default function DashboardPage() {
@@ -34,10 +68,6 @@ export default function DashboardPage() {
   const [groups, setGroups] = useState<Group[]>([]);
   const [loading, setLoading] = useState(true);
   const [listError, setListError] = useState<string | null>(null);
-
-  // Per-group, per-action busy flag so only the row/button clicked shows a spinner state
-  // key: `${groupId}:${action}`
-  const [actionBusy, setActionBusy] = useState<string | null>(null);
 
   // The white page background was leaking around the paper texture on
   // scroll/overscroll — force the underlying document to match.
@@ -96,61 +126,6 @@ export default function DashboardPage() {
     router.push(`/src/groups/${id}`);
   }
 
-  async function handleJoin(e: React.MouseEvent, id: string) {
-    e.stopPropagation();
-    const key = `${id}:join`;
-    setActionBusy(key);
-    setListError(null);
-    try {
-      const res = await fetch(`/api/groups/${id}/members`, { method: "POST" });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data?.error || "Failed to join group");
-      setGroups((prev) => prev.map((g) => (g.id === id ? data : g)));
-    } catch (err) {
-      console.error(err);
-      setListError(err instanceof Error ? err.message : "Something went wrong");
-    } finally {
-      setActionBusy(null);
-    }
-  }
-
-  async function handleLeave(e: React.MouseEvent, id: string) {
-    e.stopPropagation();
-    const key = `${id}:leave`;
-    setActionBusy(key);
-    setListError(null);
-    try {
-      const res = await fetch(`/api/groups/${id}/members`, { method: "DELETE" });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data?.error || "Failed to leave group");
-      setGroups((prev) => prev.map((g) => (g.id === id ? data : g)));
-    } catch (err) {
-      console.error(err);
-      setListError(err instanceof Error ? err.message : "Something went wrong");
-    } finally {
-      setActionBusy(null);
-    }
-  }
-
-  async function handleDeleteGroup(e: React.MouseEvent, id: string) {
-    e.stopPropagation();
-    if (!window.confirm("Delete this group? This can't be undone.")) return;
-    const key = `${id}:delete`;
-    setActionBusy(key);
-    setListError(null);
-    try {
-      const res = await fetch(`/api/groups/${id}`, { method: "DELETE" });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data?.error || "Failed to delete group");
-      setGroups((prev) => prev.filter((g) => g.id !== id));
-    } catch (err) {
-      console.error(err);
-      setListError(err instanceof Error ? err.message : "Something went wrong");
-    } finally {
-      setActionBusy(null);
-    }
-  }
-
   return (
     <div
       className={`${handwritten.variable} ${typewriter.variable} ${courierPrime.variable} min-h-screen`}
@@ -197,133 +172,59 @@ export default function DashboardPage() {
           transition: border-color 0.15s, color 0.15s;
         }
 
-        .group-row {
-          display: flex;
-          flex-direction: row;
-          flex-wrap: nowrap;
-          align-items: center;
-          gap: 0.75rem;
-          border: 1px solid rgba(138, 133, 120, 0.25);
-          border-radius: 2px;
-          padding: 0.75rem 1rem;
-          background: #FAF7ED;
-          box-shadow: 3px 4px 0 rgba(43, 43, 46, 0.06);
-          cursor: pointer;
-          transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
+        .groups-section {
+          margin-bottom: 2.5rem;
         }
 
-        .group-row:hover {
-          transform: translateY(-2px);
-          border-color: rgba(138, 133, 120, 0.5);
-          box-shadow: 4px 6px 0 rgba(43, 43, 46, 0.1);
-        }
-
-        .group-row__info {
-          display: flex;
-          flex-direction: row;
-          flex-wrap: nowrap;
-          align-items: baseline;
-          gap: 0.625rem;
-          min-width: 0;
-          flex: 1 1 auto;
-        }
-
-        .group-row__title {
-          overflow: hidden;
-          text-overflow: ellipsis;
-          white-space: nowrap;
-          font-size: 1.25rem;
-          line-height: 1.2;
+        .groups-section__title {
+          font-size: 1.1rem;
           color: #2B2B2E;
-          font-family: var(--font-hand);
+          margin-bottom: 0.75rem;
         }
 
-        .group-row__members {
-          flex-shrink: 0;
-          display: flex;
-          flex-direction: row;
-          align-items: center;
-          gap: 0.25rem;
-          font-size: 0.75rem;
-          color: #8A8578;
-          font-family: var(--font-type);
+        .groups-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(6.5rem, 1fr));
+          gap: 1.5rem 1rem;
         }
 
-        .group-row__actions {
-          flex-shrink: 0;
-          display: flex;
-          flex-direction: row;
-          flex-wrap: nowrap;
-          align-items: center;
-          gap: 0.375rem;
-          font-family: var(--font-type);
-        }
-
-        .group-row__action-btn {
-          display: flex;
-          align-items: center;
-          gap: 0.25rem;
-          border-radius: 2px;
-          padding: 0.375rem 0.625rem;
-          font-size: 0.75rem;
-        }
-
-        .group-row__action-btn:disabled {
-          opacity: 0.4;
-        }
-
-        .group-row__leave-btn {
-          border: 1px solid rgba(138, 133, 120, 0.5);
-          color: #2B2B2E;
-          background: transparent;
-        }
-
-        .group-row__leave-btn:hover {
-          background: rgba(138, 133, 120, 0.1);
-        }
-
-        .group-row__join-btn {
-          border: none;
-          color: #FAF7ED;
-          background: #2B2B2E;
-        }
-
-        .group-row__join-btn:hover {
-          background: rgba(43, 43, 46, 0.9);
-        }
-
-        .group-row__delete-btn {
-          border: none;
-          color: #B33A3A;
-          background: transparent;
-          padding: 0.375rem 0.5rem;
-        }
-
-        .group-row__delete-btn:hover {
-          background: rgba(179, 58, 58, 0.1);
-        }
-
-        .group-row__chevron {
-          margin-left: 0.25rem;
-          color: #8A8578;
-          transition: transform 0.15s;
-        }
-
-        .group-row:hover .group-row__chevron {
-          transform: translateX(2px);
-        }
-
-        .groups-list {
+        .group-card {
           display: flex;
           flex-direction: column;
-          gap: 0.625rem;
+          align-items: center;
+          gap: 0.5rem;
         }
 
-        .group-row-skeleton {
-          height: 3.5rem;
-          border-radius: 2px;
+        .group-card__members {
+          display: flex;
+          align-items: center;
+          gap: 0.25rem;
+          font-size: 0.7rem;
+          color: #8A8578;
+          font-family: var(--font-type);
+        }
+
+        .group-card-skeleton {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 0.5rem;
+        }
+
+        .group-card-skeleton__image {
+          width: 5rem;
+          height: 5rem;
+          border-radius: 12px;
           border: 1px solid rgba(138, 133, 120, 0.2);
           background: rgba(250, 247, 237, 0.6);
+          animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        .group-card-skeleton__line {
+          width: 3.5rem;
+          height: 0.7rem;
+          border-radius: 2px;
+          background: rgba(138, 133, 120, 0.2);
           animation: pulse 1.5s ease-in-out infinite;
         }
 
@@ -367,41 +268,8 @@ export default function DashboardPage() {
         {/* Groups header — count on the left, "new group" control on the right, single row */}
         <div className="groups-header">
           <p className="groups-header__count">
-            {loading ? "loading…" : `${groups.length} group${groups.length === 1 ? "" : "s"} pinned up`}
+            {loading ? "loading…" : `You are apart of ${groups.length} group${groups.length === 1 ? "" : "s"}`}
           </p>
-
-          <button onClick={() => router.push("/src/groups-create")} className="groups-header__new-btn">
-            <Plus className="h-4 w-4" strokeWidth={1.5} />
-            New group
-          </button>
-        </div>
-
-        <h1>Grocery Lists</h1>
-        <div className="flex flex-row gap-[1.5rem]">
-          <GroupPreview 
-            imageUrl="https://upload.wikimedia.org/wikipedia/commons/thumb/4/41/Minion_sculpture_in_Brisbane%2C_2024.jpg/250px-Minion_sculpture_in_Brisbane%2C_2024.jpg"
-            name="Test"
-            clickPath={() => null}
-          ></GroupPreview>
-          <GroupPreview 
-            imageUrl="https://upload.wikimedia.org/wikipedia/commons/thumb/4/41/Minion_sculpture_in_Brisbane%2C_2024.jpg/250px-Minion_sculpture_in_Brisbane%2C_2024.jpg"
-            name="Test"
-            clickPath={() => null}
-          ></GroupPreview>
-        </div>
-    
-        <h1>Receipts</h1>
-        <div className="flex flex-row gap-[1.5rem]">
-          <GroupPreview 
-            imageUrl="https://upload.wikimedia.org/wikipedia/commons/thumb/4/41/Minion_sculpture_in_Brisbane%2C_2024.jpg/250px-Minion_sculpture_in_Brisbane%2C_2024.jpg"
-            name="Test"
-            clickPath={() => null}
-          ></GroupPreview>
-          <GroupPreview 
-            imageUrl="https://upload.wikimedia.org/wikipedia/commons/thumb/4/41/Minion_sculpture_in_Brisbane%2C_2024.jpg/250px-Minion_sculpture_in_Brisbane%2C_2024.jpg"
-            name="Test"
-            clickPath={() => null}
-          ></GroupPreview>
         </div>
 
         {listError && (
@@ -410,73 +278,47 @@ export default function DashboardPage() {
           </p>
         )}
 
-        {/* List */}
-        <div className="groups-list">
-          {loading &&
-            Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="group-row-skeleton" />
-            ))}
+        {/* Real groups, split into two rows by group.type, rendered as GroupPreview cards */}
 
-          {!loading &&
-            groups.map((group) => {
-              const isMember = !!user && group.members.includes(user.id);
-              const joinBusy = actionBusy === `${group.id}:join`;
-              const leaveBusy = actionBusy === `${group.id}:leave`;
-              const deleteBusy = actionBusy === `${group.id}:delete`;
+        {(["GROCERY_LIST", "SPLITTER"] as const).map((sectionType) => {
+          const sectionGroups = groups.filter((g) => g.type === sectionType);
+          const sectionLabel = sectionType === "GROCERY_LIST" ? "Grocery Lists" : "Receipt Splitter";
 
-              return (
-                <div key={group.id} onClick={() => openGroup(group.id)} className="group-row">
-                  <Paperclip className="h-5 w-5 shrink-0 -rotate-12 text-[#8A8578]" strokeWidth={1.5} />
+          return (
+            <div key={sectionType} className="groups-section">
+              <h2 className="groups-section__title">{sectionLabel}</h2>
+              <div className="groups-grid">
+                {loading &&
+                  Array.from({ length: 2 }).map((_, i) => (
+                    <div key={i} className="group-card-skeleton">
+                      <div className="group-card-skeleton__image" />
+                      <div className="group-card-skeleton__line" />
+                    </div>
+                  ))}
 
-                  <div className="group-row__info">
-                    <h2 className="group-row__title">{group.title}</h2>
-                    <span className="group-row__members">
-                      <Users className="h-3.5 w-3.5" strokeWidth={1.75} />
-                      {group.members.length}
-                    </span>
-                  </div>
+                {!loading &&
+                  sectionGroups.map((group) => (
+                    <div key={group.id} className="group-card">
+                      <GroupPreview
+                        imageUrl={getGroupImage(group)}
+                        name={group.title}
+                        clickPath={() => openGroup(group.id)}
+                      />
+                      <DeleteButton group_id={group.id} onBack=""></DeleteButton>
+                    </div>
+                  ))}
 
-                  <div className="group-row__actions">
-                    {isMember ? (
-                      <button
-                        onClick={(e) => handleLeave(e, group.id)}
-                        disabled={leaveBusy}
-                        title="Leave group"
-                        aria-label="Leave group"
-                        className="group-row__action-btn group-row__leave-btn"
-                      >
-                        <LogOut className="h-3.5 w-3.5" />
-                        {leaveBusy ? "…" : "Leave"}
-                      </button>
-                    ) : (
-                      <button
-                        onClick={(e) => handleJoin(e, group.id)}
-                        disabled={joinBusy}
-                        title="Join group"
-                        aria-label="Join group"
-                        className="group-row__action-btn group-row__join-btn"
-                      >
-                        <LogIn className="h-3.5 w-3.5" />
-                        {joinBusy ? "…" : "Join"}
-                      </button>
-                    )}
-
-                    <button
-                      onClick={(e) => handleDeleteGroup(e, group.id)}
-                      disabled={deleteBusy}
-                      title="Delete group"
-                      aria-label="Delete group"
-                      className="group-row__action-btn group-row__delete-btn"
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </button>
-
-                    <ChevronRight className="group-row__chevron h-4 w-4" strokeWidth={2} />
-                  </div>
-                </div>
-              );
-            })}
-        </div>
+                {!loading && (
+                  <GroupPreview
+                    imageUrl="https://static.thenounproject.com/png/358073-200.png"
+                    name="Create New"
+                    clickPath={() => router.push(`/src/groups-create?type=${sectionType}`)}
+                  ></GroupPreview>
+                )}
+              </div>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
