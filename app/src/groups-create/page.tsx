@@ -1,15 +1,18 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Button from "../components/ui/Button";
 import TextField from "../components/ui/FieldInput";
-import { useRouter } from "next/navigation";
 
 export default function CreateGroup() {
+  const searchParams = useSearchParams();
+  const sectionType = searchParams.get("type") ?? "grocery";
+
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [img, setImg] = useState("");
-  const [type, setType] = useState("");
+  const [type, setType] = useState(sectionType);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
@@ -80,13 +83,12 @@ export default function CreateGroup() {
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        <h2 style={{ marginTop: 0 }}>Create New Group</h2>
+        <h2 style={{ marginTop: 0 }}>Create New {sectionType === "event" ? "Event" : "Grocery"} Group</h2>
 
         <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
           <TextField label="Title" value={title} onChange={(value: string) => setTitle(value)} />
           <TextField label="Description" value={description} onChange={(value: string) => setDescription(value)} />
           <TextField label="Image Link" value={img} onChange={(value: string) => setImg(value)} />
-          <TextField label="Type" value={type} onChange={(value: string) => setType(value)} />
         </div>
 
         {error && <p style={{ color: "red", marginTop: 12 }}>{error}</p>}

@@ -6,6 +6,7 @@ import { Kalam, Special_Elite, Courier_Prime } from "next/font/google";
 import { NudgeNavBar } from "../components/Nav"
 import GroupPreview from "../components/ui/GroupPreview";
 import DeleteButton from "../components/ui/DeleteGroupButton";
+import CreateGroup from "../groups-create/page";
 
 const handwritten = Kalam({ subsets: ["latin"], weight: ["400", "700"], variable: "--font-hand" });
 const typewriter = Special_Elite({ subsets: ["latin"], weight: "400", variable: "--font-type" });
