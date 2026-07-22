@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Kalam, Special_Elite, Courier_Prime } from "next/font/google";
 import { Plus, Paperclip, Users, LogIn, LogOut, Trash2, ChevronRight } from "lucide-react";
 import { NudgeNavBar } from "../components/Nav"
+import GroupPreview from "../components/ui/GroupPreview";
 
 const handwritten = Kalam({ subsets: ["latin"], weight: ["400", "700"], variable: "--font-hand" });
 const typewriter = Special_Elite({ subsets: ["latin"], weight: "400", variable: "--font-type" });
@@ -373,6 +374,34 @@ export default function DashboardPage() {
             <Plus className="h-4 w-4" strokeWidth={1.5} />
             New group
           </button>
+        </div>
+
+        <h1>Grocery Lists</h1>
+        <div className="flex flex-row gap-[1.5rem]">
+          <GroupPreview 
+            imageUrl="https://upload.wikimedia.org/wikipedia/commons/thumb/4/41/Minion_sculpture_in_Brisbane%2C_2024.jpg/250px-Minion_sculpture_in_Brisbane%2C_2024.jpg"
+            name="Test"
+            clickPath={() => null}
+          ></GroupPreview>
+          <GroupPreview 
+            imageUrl="https://upload.wikimedia.org/wikipedia/commons/thumb/4/41/Minion_sculpture_in_Brisbane%2C_2024.jpg/250px-Minion_sculpture_in_Brisbane%2C_2024.jpg"
+            name="Test"
+            clickPath={() => null}
+          ></GroupPreview>
+        </div>
+    
+        <h1>Receipts</h1>
+        <div className="flex flex-row gap-[1.5rem]">
+          <GroupPreview 
+            imageUrl="https://upload.wikimedia.org/wikipedia/commons/thumb/4/41/Minion_sculpture_in_Brisbane%2C_2024.jpg/250px-Minion_sculpture_in_Brisbane%2C_2024.jpg"
+            name="Test"
+            clickPath={() => null}
+          ></GroupPreview>
+          <GroupPreview 
+            imageUrl="https://upload.wikimedia.org/wikipedia/commons/thumb/4/41/Minion_sculpture_in_Brisbane%2C_2024.jpg/250px-Minion_sculpture_in_Brisbane%2C_2024.jpg"
+            name="Test"
+            clickPath={() => null}
+          ></GroupPreview>
         </div>
 
         {listError && (
