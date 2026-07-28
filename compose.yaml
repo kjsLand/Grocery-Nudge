@@ -35,5 +35,14 @@ services:
       - /app/.next           # same idea — keep container's .next isolated
       - ./lib/db:/app/lib/db
 
+  ocr:
+    build:
+      context: ./ocr
+    container_name: nudge-ocr
+    volumes:
+      - ./ocr/receipt_data:/receipt_data
+      - paddleocr_models:/root/.paddleocr
+
 volumes:
   nudge_pgdata:
+  paddleocr_models:

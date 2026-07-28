@@ -45,3 +45,5 @@ next-env.d.ts
 /nudge-api
 
 /lib/db/*
+ocr/receipt_data
+/.venv
