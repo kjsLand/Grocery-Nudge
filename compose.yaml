@@ -41,8 +41,8 @@ services:
     container_name: nudge-ocr
     volumes:
       - ./ocr/receipt_data:/receipt_data
-      - paddleocr_models:/root/.paddleocr
-
+      - rapidocr_models:/root/.rapidocr
+  
 volumes:
   nudge_pgdata:
-  paddleocr_models:
+  rapidocr_models:

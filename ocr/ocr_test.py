@@ -1,30 +1,38 @@
 import sys
-from paddleocr import PaddleOCR
+import os
+from rapidocr import RapidOCR
+from PIL import Image
+from pillow_heif import register_heif_opener
+
+register_heif_opener()
 
 
 def main():
     if len(sys.argv) < 2:
-        print("Usage: python ocr_test.py <path_to_image>")
-        sys.exit(1)
+        sys.exit("Usage: python ocr_test.py <path_to_image>")
 
     image_path = sys.argv[1]
+    if not os.path.exists(image_path):
+        sys.exit(f"No such file: {image_path}")
 
-    # use_textline_orientation handles rotated text, lang can be 'en', 'ch', etc.
-    ocr = PaddleOCR(
-        use_doc_orientation_classify=False,
-        use_doc_unwarping=False,
-        use_textline_orientation=False,
-        lang='en'
-    )
+    from rapidocr import RapidOCR, EngineType, ModelType, OCRVersion
 
-    result = ocr.predict(image_path)
+    engine = RapidOCR(params={
+        "Det.engine_type": EngineType.ONNXRUNTIME,
+        "Det.ocr_version": OCRVersion.PPOCRV6,
+        "Det.model_type": ModelType.PPOCRV4,
+        "Rec.engine_type": EngineType.ONNXRUNTIME,
+        "Rec.ocr_version": OCRVersion.PPOCRV6,
+        "Rec.model_type": ModelType.PPOCRV4,
+    })
+    result = engine(Image.open(image_path).convert("RGB"))
 
     print("\n--- OCR Results ---")
-    for res in result:
-        texts = res["rec_texts"]
-        scores = res["rec_scores"]
-        for text, confidence in zip(texts, scores):
-            print(f"Text: {text!r} | Confidence: {confidence:.4f}")
+    if result.txts is None:
+        print("No text detected.")
+        return
+    for text, confidence in zip(result.txts, result.scores):
+        print(f"Text: {text!r} | Confidence: {confidence:.4f}")
 
 
 if __name__ == "__main__":
